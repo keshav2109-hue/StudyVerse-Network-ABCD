@@ -37,7 +37,7 @@ export function SubjectCard({
   };
 
   return (
-    <Link href={href} onClick={handleClick} className="group block" aria-label={`View ${title}`}>
+    <Link href={href} onClick={handleClick} className="group block no-underline" aria-label={`View ${title}`}>
       <Card className="flex items-center p-2.5 rounded-xl shadow-md transition-transform duration-200 ease-in-out group-hover:scale-[1.02] border-0">
         <Image
           src={imageUrl}
