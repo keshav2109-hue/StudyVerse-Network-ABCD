@@ -11,6 +11,8 @@ export default function GenerateSecureKeyPage() {
   const router = useRouter();
 
   const handleGenerateClick = () => {
+    // Set a flag in localStorage to indicate the user has started the process correctly.
+    localStorage.setItem('generateKeyClicked', 'true');
     // When the user is sent to the external site, we assume the external
     // site will eventually redirect them back to /mainedu with a query param.
     window.location.href = EXTERNAL_LINK;
