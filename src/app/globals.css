@@ -12,7 +12,7 @@ body {
 
 @layer base {
   a {
-    text-decoration: none;
+    @apply text-inherit no-underline;
   }
   :root {
     --background: 0 0% 100%;
