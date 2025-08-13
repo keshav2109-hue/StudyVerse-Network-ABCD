@@ -68,7 +68,11 @@ async function getSubjectData(
 
   try {
     let url = "";
-    if (originPath === '/pcmb') {
+    const isClass11SpecialSubject = (originPath === '/pcmb' || originPath === '/commerce') && ['maths', 'mathematics', 'english', 'hindi'].includes(slug);
+
+    if (isClass11SpecialSubject) {
+      url = "https://eduverseapi.vercel.app/eduverse/api/11/mathsenglishhindi";
+    } else if (originPath === '/pcmb') {
       url = "https://eduverseapi.vercel.app/eduverse/api/11/science";
     } else if (originPath === '/commerce') {
       url = "https://eduverseapi.vercel.app/eduverse/api/11/commerce";
