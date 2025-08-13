@@ -1,13 +1,13 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Copy, KeyRound, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { Copy, KeyRound, ShieldCheck, AlertTriangle, Loader } from 'lucide-react';
 
 const TOKEN_STORAGE_KEY = 'eduverse-secure-token';
 
-export default function MainEduPage() {
+function MainEduPageContent() {
   const [token, setToken] = useState('');
   const [isVerified, setIsVerified] = useState(false);
   const router = useRouter();
@@ -97,4 +97,16 @@ export default function MainEduPage() {
       </div>
     </div>
   );
+}
+
+export default function MainEduPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 via-white to-pink-100">
+                <Loader className="w-8 h-8 animate-spin text-blue-500" />
+            </div>
+        }>
+            <MainEduPageContent />
+        </Suspense>
+    )
 }
