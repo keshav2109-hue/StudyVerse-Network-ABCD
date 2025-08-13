@@ -240,7 +240,7 @@ export default async function SubjectPage({
                   const watchUrl = `/eduverseplay?videoUrl=${encodeURIComponent(lecture.videoEmbedUrl)}`;
 
                   return (
-                    <Link href={watchUrl} key={`${lecture.id}-${lecture.title}-video-${index}`}>
+                    <Link href={watchUrl} key={`${lecture.id}-${lecture.title}-video-${index}`} className="no-underline">
                       <TopicCard
                         title={lecture.title}
                         imageUrl={subjectImages[slug] || defaultImageUrl}

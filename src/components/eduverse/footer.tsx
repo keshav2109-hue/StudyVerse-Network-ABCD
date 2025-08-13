@@ -86,21 +86,6 @@ export function Footer() {
                 </li>
               </ul>
             </div>
-            {/* Download App */}
-            <div className="col-12 col-sm-6 col-md-4 col-lg-2">
-              <h4 className="footTitle my-3">Download App</h4>
-              <ul className="list-unstyled d-flex flex-column">
-                  <a href="https://play.google.com/store/apps/details?id=com.nexttoppers.app" className="mb-2">
-                    <Image
-                        src="https://i.ibb.co/Q7XzZznX/image.png"
-                        alt="Google Play"
-                        width={96}
-                        height={28}
-                        style={{ width: '96px', height: 'auto' }}
-                    />
-                  </a>
-              </ul>
-            </div>
           </div>
         </div>
 
