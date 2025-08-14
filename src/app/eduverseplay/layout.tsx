@@ -13,34 +13,25 @@ export default function VideoPlayerLayout({
       e.preventDefault();
     };
     document.addEventListener('contextmenu', handleContextmenu);
+
+    // Apply class to body when this layout is active
+    document.body.classList.add('bg-black');
+    
     return () => {
       document.removeEventListener('contextmenu', handleContextmenu);
+      // Clean up class from body when this layout is no longer active
+      document.body.classList.remove('bg-black');
     };
   }, []);
 
   return (
-    <html lang="en">
-      <head>
-        <title>Eduverse 2.0 - Player</title>
-        <meta
-          name="description"
-          content="Eduverse 2.0 - Your gateway to knowledge"
-        />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter&display=swap"
-          rel="stylesheet"
-        ></link>
-      </head>
-      {/* By using a plain body tag here, we prevent the root layout's footer from rendering */}
-      <body className="font-body antialiased bg-black">
-        {children}
-      </body>
-    </html>
+    <>
+        <head>
+            <title>Eduverse 2.0 - Player</title>
+        </head>
+        <div className="font-body antialiased bg-black">
+            {children}
+        </div>
+    </>
   );
 }
