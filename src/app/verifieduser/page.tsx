@@ -8,6 +8,15 @@ import { Loader } from 'lucide-react';
 
 const batches = [
     {
+        name: 'Aarambh 2024-25 Batch',
+        href: '/edu10aarambh',
+        imageUrl: 'https://i.postimg.cc/CnNr5W8b/image.png',
+        validity: '365 Days',
+        price: 'Free',
+        originalPrice: '',
+        imageHint: 'class 10 batch',
+    },
+    {
         name: 'Prarambh Batch | Science Class 11',
         href: '/pcmb',
         imageUrl: 'https://dxixtlyravvxx.cloudfront.net/540/admin_v1/bundle_management/course/183130728609_Prarambh%20BATCh%20Science%20Class%2011.png',

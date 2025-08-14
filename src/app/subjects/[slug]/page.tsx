@@ -76,7 +76,7 @@ async function getSubjectData(
       url = "https://eduverseapi.vercel.app/eduverse/api/11/science";
     } else if (originPath === '/commerce') {
       url = "https://eduverseapi.vercel.app/eduverse/api/11/commerce";
-    } else if (originPath === '/edu10') {
+    } else if (originPath === '/edu10' || originPath === '/edu10aarambh') {
       url = "https://eduverseapi.vercel.app/eduverse/api/10";
     } else if (originPath === '/edu9') {
       url = "https://eduverseapi.vercel.app/eduverse/api/9";
@@ -129,7 +129,7 @@ async function getDppData(
             url = "https://eduverseapi.vercel.app/eduverse/api/dpp/11science";
         } else if (originPath === '/commerce') {
             url = "https://eduverseapi.vercel.app/eduverse/api/dpp/11commerce";
-        } else if (originPath === '/edu10') {
+        } else if (originPath === '/edu10' || originPath === '/edu10aarambh') {
             url = "https://eduverseapi.vercel.app/eduverse/api/dpp/10";
         } else if (originPath === '/edu9') {
             url = "https://eduverseapi.vercel.app/eduverse/api/dpp/9";
