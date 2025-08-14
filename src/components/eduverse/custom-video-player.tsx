@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Hls from 'hls.js';
-import { Play, Pause, Maximize, Minimize, FastForward, Rewind, Settings, Check } from 'lucide-react';
+import { Play, Pause, Maximize, Minimize, Settings, Check } from 'lucide-react';
 import Image from 'next/image';
 
 interface CustomVideoPlayerProps {
@@ -150,7 +150,7 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
       video.removeEventListener('play', handlePlay);
       video.removeEventListener('pause', handlePause);
     };
-  }, [src]);
+  }, [src, isPlaying]);
 
   const togglePlayPause = useCallback(() => {
     const video = videoRef.current;
@@ -303,7 +303,7 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
             }, 3000);
         }
       }}
-      className="relative w-full aspect-video bg-black flex justify-center items-center group"
+      className="relative w-full aspect-video bg-black flex justify-center items-center group rounded-lg overflow-hidden"
     >
       <video ref={videoRef} className="w-full h-full" onClick={togglePlayPause} />
 
@@ -331,11 +331,9 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
 
         <div className="flex items-center justify-between text-white mt-2">
             <div className="flex items-center gap-4">
-                <button onClick={() => handleSeek(-10)}><Rewind size={20} /></button>
                 <button onClick={togglePlayPause}>
                     {isPlaying ? <Pause size={24} /> : <Play size={24} />}
                 </button>
-                <button onClick={() => handleSeek(10)}><FastForward size={20} /></button>
             </div>
 
             <div className="flex items-center gap-4">
