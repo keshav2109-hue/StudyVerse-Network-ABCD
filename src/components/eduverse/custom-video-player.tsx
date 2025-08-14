@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -106,18 +107,20 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
     const hls = new Hls();
     hlsRef.current = hls;
 
+    const wasPlaying = isPlaying;
+
     if (Hls.isSupported()) {
       hls.loadSource(src);
       hls.attachMedia(video);
       hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
-        if(isPlaying || video.autoplay) {
+        if(wasPlaying || video.autoplay) {
             video.play().catch(e => console.error("Autoplay was prevented:", e));
         }
       });
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
       video.src = src;
       video.addEventListener('loadedmetadata', () => {
-         if(isPlaying || video.autoplay) {
+         if(wasPlaying || video.autoplay) {
             video.play().catch(e => console.error("Autoplay was prevented:", e));
         }
       });
@@ -150,7 +153,7 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
       video.removeEventListener('play', handlePlay);
       video.removeEventListener('pause', handlePause);
     };
-  }, [src, isPlaying]);
+  }, [src]);
 
   const togglePlayPause = useCallback(() => {
     const video = videoRef.current;
@@ -160,7 +163,6 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
     } else {
       video.pause();
     }
-    setIsPlaying(!video.paused);
   }, []);
 
   const handleProgressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
