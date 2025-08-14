@@ -13,6 +13,7 @@ import { Card } from "@/components/ui/card";
 import Image from "next/image";
 import { DppCard } from "@/components/eduverse/dpp-card";
 import { aarambhVideos, aarambhNotes } from "@/lib/aarambh-data";
+import { abhayVideos, abhayNotes } from "@/lib/abhay-data";
 
 interface Lecture {
   id: string;
@@ -93,9 +94,10 @@ async function getSubjectData(
     return { subjectName, topics };
   }
 
-  // Placeholder for Abhay 2025 data
   if (originPath === '/abhay2025') {
-    return { subjectName, topics: [] };
+    // @ts-ignore
+    const topics = abhayVideos[slug] || [];
+    return { subjectName, topics };
   }
 
   try {
@@ -140,7 +142,8 @@ async function getMaterialsData(
     }
 
     if (originPath === '/abhay2025') {
-      return [];
+      // @ts-ignore
+      return abhayNotes[slug] || [];
     }
     
     try {
@@ -238,8 +241,9 @@ export default async function SubjectPage({
   const lecturesWithVideo = allLectures.filter(lecture => lecture.videoEmbedUrl);
   const lecturesWithNotes = allLectures.filter(lecture => lecture.notesLink);
 
-  const dpps = from === '/edu10aarambh' ? [] : materials;
-  const notes = from === '/edu10aarambh' ? materials : lecturesWithNotes;
+  const isAbhayOrAarambh = from === '/edu10aarambh' || from === '/abhay2025';
+  const dpps = isAbhayOrAarambh ? [] : materials;
+  const notes = isAbhayOrAarambh ? materials : lecturesWithNotes;
 
   return (
     <div className="min-h-screen bg-gray-50 text-foreground">
@@ -260,12 +264,16 @@ export default async function SubjectPage({
         <div className="grid grid-cols-1 gap-px bg-gray-100 border-t">
             {lecturesWithVideo.length > 0 ? (
                 lecturesWithVideo.map((lecture, index) => {
-                  const watchUrl = lecture.videoEmbedType === 'youtube'
+                  let watchUrl = lecture.videoEmbedType === 'youtube'
                     ? `/watch?videoUrl=${encodeURIComponent(lecture.videoEmbedUrl)}&title=${encodeURIComponent(lecture.title)}&videoType=youtube`
                     : `/eduverseplay?videoUrl=${encodeURIComponent(lecture.videoEmbedUrl)}`;
+                    
+                   if (from === '/abhay2025' && lecture.videoEmbedType !== 'youtube') {
+                        watchUrl = lecture.videoEmbedUrl;
+                   }
 
                   return (
-                    <Link href={watchUrl} key={`${lecture.id}-${lecture.title}-video-${index}`} className="no-underline">
+                    <Link href={watchUrl} key={`${lecture.id}-${lecture.title}-video-${index}`} className="no-underline" target={from === '/abhay2025' && lecture.videoEmbedType !== 'youtube' ? '_blank' : '_self'}>
                       <TopicCard
                         title={lecture.title}
                         imageUrl={subjectImages[slug] || defaultImageUrl}
@@ -288,13 +296,14 @@ export default async function SubjectPage({
                   
                   const downloadUrl = note.notesLink || material.download_url;
                   const title = note.notesTitle || note.title || material.title;
+                  const key = note.id || material.id || title;
 
                   return (
                     <a
                         href={downloadUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        key={`${note.id || material.id}-${title}-note-${index}`}
+                        key={`${key}-note-${index}`}
                         className="group block"
                     >
                         <Card className="flex items-center p-2.5 rounded-xl shadow-md transition-transform duration-200 ease-in-out group-hover:scale-[1.02] border bg-white">
