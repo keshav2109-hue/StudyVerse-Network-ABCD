@@ -13,9 +13,22 @@ export default function GenerateSecureKeyPage() {
 
   useEffect(() => {
     // Check if the auth cookie exists
-    const cookie = document.cookie.split('; ').find(row => row.startsWith('eduverse_auth='));
-    if (cookie) {
-      setHasValidKey(true);
+    const authCookie = document.cookie.split('; ').find(row => row.startsWith('eduverse_auth='));
+    const verifiedTokenItem = localStorage.getItem('verifiedEduverseToken');
+
+    if (authCookie && verifiedTokenItem) {
+        try {
+            const tokenData = JSON.parse(verifiedTokenItem);
+            if (tokenData.expiresAt && tokenData.expiresAt > Date.now()) {
+                setHasValidKey(true);
+            } else {
+                // Clean up expired token
+                localStorage.removeItem('verifiedEduverseToken');
+            }
+        } catch (e) {
+            // Clean up malformed token
+            localStorage.removeItem('verifiedEduverseToken');
+        }
     }
   }, []);
 

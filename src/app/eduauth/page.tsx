@@ -25,8 +25,13 @@ export default function EduAuthPage() {
 
     if (value === storedToken) {
       const expiryTime = Date.now() + 24 * 60 * 60 * 1000;
-      document.cookie = `eduverse_auth=true; expires=${new Date(expiryTime).toUTCString()}; path=/`;
-      localStorage.setItem("verifiedEduverseToken", JSON.stringify({ expiresAt: expiryTime }));
+      const expiryDate = new Date(expiryTime);
+
+      // Set cookie with 24-hour expiry
+      document.cookie = `eduverse_auth=true; expires=${expiryDate.toUTCString()}; path=/`;
+      
+      // Set local storage item with 24-hour expiry
+      localStorage.setItem("verifiedEduverseToken", JSON.stringify({ value: true, expiresAt: expiryTime }));
       
       localStorage.removeItem('eduverse-secure-token');
 
