@@ -1,7 +1,7 @@
 
 'use client';
 
-import { KeyRound, ShieldCheck, ArrowRight } from "lucide-react";
+import { KeyRound, ShieldCheck, ArrowRight, HelpCircle } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -42,8 +42,34 @@ export default function GenerateSecureKeyPage() {
     router.push('/verifieduser');
   };
 
+  const videoId = "AuEmR1DXyqU";
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 via-white to-pink-100 font-sans">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 via-white to-pink-100 font-sans p-4">
+
+      {!hasValidKey && (
+        <div className="w-[90%] max-w-md mb-6 p-4 rounded-2xl shadow-xl backdrop-blur bg-white/50 border border-white/30 text-center">
+            <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center justify-center gap-2">
+                <HelpCircle className="w-6 h-6 text-blue-500" />
+                Need Help?
+            </h2>
+            <p className="text-gray-600 text-sm mb-4">
+              If you have any trouble generating a key, you can watch this video for help.
+            </p>
+            <div className="aspect-video rounded-lg overflow-hidden shadow-lg">
+                <iframe
+                    width="100%"
+                    height="100%"
+                    src={`https://www.youtube.com/embed/${videoId}`}
+                    title="YouTube video player"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                ></iframe>
+            </div>
+        </div>
+      )}
+
       <div className="w-[90%] max-w-md p-8 rounded-2xl shadow-2xl backdrop-blur bg-white/60 border border-white/30 text-center animate-fadeIn">
         {hasValidKey ? (
           <>
