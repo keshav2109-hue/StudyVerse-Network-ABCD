@@ -2,24 +2,28 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Hls from 'hls.js';
-import { Play, Pause, Volume2, VolumeX, Maximize, Minimize, FastForward, Rewind } from 'lucide-react';
+import { Play, Pause, Maximize, Minimize, FastForward, Rewind, Settings, Check } from 'lucide-react';
 
 interface CustomVideoPlayerProps {
   src: string;
 }
 
+const playbackSpeeds = [0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3];
+
 export function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLInputElement>(null);
+  const settingsMenuRef = useRef<HTMLDivElement>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useState(1);
-  const [isMuted, setIsMuted] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
+  const [showSettings, setShowSettings] = useState(false);
+  const [activeSettingsMenu, setActiveSettingsMenu] = useState<'main' | 'speed'>('main');
+  const [playbackRate, setPlaybackRate] = useState(1);
   let controlTimeout: NodeJS.Timeout;
 
   useEffect(() => {
@@ -78,28 +82,6 @@ export function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
     }
   }, []);
 
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newVolume = parseFloat(e.target.value);
-    setVolume(newVolume);
-    if (videoRef.current) {
-      videoRef.current.volume = newVolume;
-    }
-    setIsMuted(newVolume === 0);
-  };
-
-  const toggleMute = useCallback(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    if (isMuted) {
-        video.muted = false;
-        setVolume(video.volume || 0.5);
-    } else {
-        video.muted = true;
-        setVolume(0);
-    }
-    setIsMuted(!isMuted);
-  }, [isMuted]);
-
   const handleProgressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const video = videoRef.current;
     if (!video) return;
@@ -142,13 +124,22 @@ export function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
     controlTimeout = setTimeout(() => {
       if (isPlaying) {
         setShowControls(false);
+        setShowSettings(false);
       }
     }, 3000);
   };
+
+  const handleSetPlaybackRate = (rate: number) => {
+    if (videoRef.current) {
+        videoRef.current.playbackRate = rate;
+        setPlaybackRate(rate);
+        setActiveSettingsMenu('main');
+    }
+  }
   
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.target instanceof HTMLInputElement) return;
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLButtonElement) return;
         switch (e.code) {
             case 'Space':
                 e.preventDefault();
@@ -159,9 +150,6 @@ export function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
                 break;
             case 'ArrowLeft':
                 handleSeek(-10);
-                break;
-            case 'KeyM':
-                toggleMute();
                 break;
             case 'KeyF':
                 toggleFullscreen();
@@ -176,17 +164,30 @@ export function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
     }
     document.addEventListener('fullscreenchange', handleFullscreenChange);
 
+    function handleClickOutside(event: MouseEvent) {
+      if (settingsMenuRef.current && !settingsMenuRef.current.contains(event.target as Node)) {
+        setShowSettings(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+
     return () => {
         window.removeEventListener('keydown', handleKeyDown);
         document.removeEventListener('fullscreenchange', handleFullscreenChange);
+        document.removeEventListener("mousedown", handleClickOutside);
     }
-  }, [togglePlayPause, toggleMute, toggleFullscreen]);
+  }, [togglePlayPause, toggleFullscreen]);
 
   return (
     <div
       ref={playerContainerRef}
       onMouseMove={handleMouseMove}
-      onMouseLeave={() => isPlaying && setShowControls(false)}
+      onMouseLeave={() => {
+        if (isPlaying) {
+            setShowControls(false);
+            setShowSettings(false);
+        }
+      }}
       className="relative w-full aspect-video bg-black flex justify-center items-center group"
     >
       <video ref={videoRef} className="w-full h-full" onClick={togglePlayPause} />
@@ -213,25 +214,42 @@ export function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
                     {isPlaying ? <Pause size={24} /> : <Play size={24} />}
                 </button>
                 <button onClick={() => handleSeek(10)}><FastForward size={20} /></button>
-                <div className="flex items-center gap-2">
-                    <button onClick={toggleMute}>
-                        {isMuted || volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
-                    </button>
-                    <input
-                        type="range"
-                        min="0"
-                        max="1"
-                        step="0.01"
-                        value={isMuted ? 0 : volume}
-                        onChange={handleVolumeChange}
-                        className="w-20 h-1 appearance-none bg-gray-600 rounded-full outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
-                        style={{backgroundSize: `${isMuted ? 0 : volume * 100}% 100%`}}
-                    />
-                </div>
             </div>
 
             <div className="flex items-center gap-4">
                  <span>{formatTime(progress)} / {formatTime(duration)}</span>
+                 <div className="relative" ref={settingsMenuRef}>
+                    <button onClick={() => setShowSettings(!showSettings)}>
+                        <Settings size={20} />
+                    </button>
+                    {showSettings && (
+                        <div className="absolute bottom-full right-0 mb-2 bg-black/80 rounded-lg p-2 min-w-[150px] text-sm">
+                           {activeSettingsMenu === 'main' && (
+                                <>
+                                    <button className="w-full text-left p-2 hover:bg-white/10 rounded-md flex justify-between">
+                                        <span>Quality</span>
+                                        <span className="text-gray-400">Auto</span>
+                                    </button>
+                                    <button onClick={() => setActiveSettingsMenu('speed')} className="w-full text-left p-2 hover:bg-white/10 rounded-md flex justify-between">
+                                        <span>Speed</span>
+                                        <span className="text-gray-400">{playbackRate}x</span>
+                                    </button>
+                                </>
+                           )}
+                           {activeSettingsMenu === 'speed' && (
+                                <>
+                                    <button onClick={() => setActiveSettingsMenu('main')} className="w-full text-left p-2 mb-1 border-b border-gray-600">Speed</button>
+                                    {playbackSpeeds.map(speed => (
+                                        <button key={speed} onClick={() => handleSetPlaybackRate(speed)} className="w-full text-left p-2 hover:bg-white/10 rounded-md flex items-center gap-2">
+                                            {playbackRate === speed && <Check size={16} />}
+                                            <span className={playbackRate !== speed ? 'ml-6' : ''}>{speed}x</span>
+                                        </button>
+                                    ))}
+                                </>
+                           )}
+                        </div>
+                    )}
+                 </div>
                 <button onClick={toggleFullscreen}>
                     {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
                 </button>
