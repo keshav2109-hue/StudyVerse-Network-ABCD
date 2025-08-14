@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 const EXTERNAL_LINK = "https://linkcents.com/";
-const YOUTUBE_VIDEO_ID = "AuEmR1DXyqU";
 
 export default function GenerateSecureKeyPage() {
   const router = useRouter();
@@ -59,7 +58,7 @@ export default function GenerateSecureKeyPage() {
                 <iframe
                     width="100%"
                     height="100%"
-                    src={`https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}`}
+                    src="https://www.youtube.com/embed/AuEmR1DXyqU"
                     title="YouTube video player"
                     frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
