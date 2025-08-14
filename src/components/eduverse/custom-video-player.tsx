@@ -19,32 +19,39 @@ const qualityLevels = {
 type Quality = keyof typeof qualityLevels;
 
 const getQualityUrl = (baseUrl: string, quality: Quality): string => {
+    // Treat the original URL as 720p
+    if (quality === '720p') {
+        return baseUrl;
+    }
+
     // Pattern 1 & 3: .../index_X.m3u8 or .../something.m3u8
     if (baseUrl.includes('/channel_vod_non_drm_hls/')) {
         const base = baseUrl.substring(0, baseUrl.lastIndexOf('/') + 1);
         switch (quality) {
             case '240p': return `${base}index_1.m3u8`;
             case '480p': return `${base}index_3.m3u8`;
-            case '720p': return `${base}index_4.m3u8`; // Or 5, using 4 for consistency
-            default: return baseUrl;
+            default: return baseUrl; // Fallback to original if something is wrong
         }
     }
 
     // Pattern 2 & 4: ..._video_VOD...
     if (baseUrl.includes('/vod_non_drm_ios/')) {
+        // Regex to find and replace the quality part of the URL
         const qualityRegex = /_video_VOD(\d+p\d+)?\.m3u8$/;
+        // Base URL is the part before the quality identifier
         const base = baseUrl.replace(qualityRegex, '_video_VOD');
+
         if (base.endsWith('_video_VOD')) {
              switch (quality) {
                 case '240p': return `${base}240p30.m3u8`;
                 case '480p': return `${base}480p30.m3u8`;
-                case '720p': return `${base}720p30.m3u8`;
-                default: return baseUrl;
+                default: return baseUrl; // Fallback to original
             }
         }
     }
     
-    return baseUrl; // Fallback
+    // If no pattern matches, return the original URL
+    return baseUrl; 
 };
 
 const getAvailableQualities = (url: string): Quality[] => {
@@ -80,7 +87,7 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
 
   useEffect(() => {
     setAvailableQualities(getAvailableQualities(initialSrc));
-    // Auto-select best quality initially
+    // Auto-select best quality initially, which is the original src
     const initialQuality: Quality = '720p';
     setCurrentQuality(initialQuality);
     setSrc(getQualityUrl(initialSrc, initialQuality));
@@ -197,7 +204,7 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
     setShowControls(true);
     clearTimeout(controlTimeout);
     controlTimeout = setTimeout(() => {
-      if (!isMouseOverPlayer && isPlaying) {
+      if (isPlaying && !isMouseOverPlayer) {
         setShowControls(false);
         setShowSettings(false);
       }
@@ -218,14 +225,19 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
         const currentTime = videoRef.current.currentTime;
         const wasPlaying = isPlaying;
 
-        setSrc(getQualityUrl(initialSrc, quality));
         setCurrentQuality(quality);
+        setSrc(getQualityUrl(initialSrc, quality));
 
-        videoRef.current.currentTime = currentTime;
+        const video = videoRef.current;
         
-        if(wasPlaying) {
-            videoRef.current.play();
-        }
+        const onLoadedMetadata = () => {
+            video.currentTime = currentTime;
+            if (wasPlaying) {
+                video.play().catch(e => console.error("Play after quality switch failed", e));
+            }
+            video.removeEventListener('loadedmetadata', onLoadedMetadata);
+        };
+        video.addEventListener('loadedmetadata', onLoadedMetadata);
 
         setActiveSettingsMenu('main');
         setShowSettings(false);
