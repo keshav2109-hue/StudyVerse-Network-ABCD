@@ -19,7 +19,7 @@ export default function VideoPlayerLayout({
   }, []);
 
   return (
-    <html lang="en">
+    <html lang="en" className="bg-black">
       <head>
         <title>Eduverse 2.0 - Player</title>
         <meta

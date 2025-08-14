@@ -24,10 +24,6 @@ export function CommunityPrompt({ isOpen, onOpenChange }: CommunityPromptProps) 
     window.open("https://t.me/EduVerse_Network", "_blank");
   };
 
-  const handleYoutubeClick = () => {
-    window.open("https://www.youtube.com/@EduVerse_Network", "_blank");
-  };
-
   return (
     <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
       <AlertDialogContent className="bg-gradient-to-br from-blue-900 via-slate-900 to-blue-900 text-white border-blue-700">
@@ -46,13 +42,6 @@ export function CommunityPrompt({ isOpen, onOpenChange }: CommunityPromptProps) 
             >
                 <Send className="w-6 h-6" />
                 Join on Telegram
-            </Button>
-             <Button 
-                onClick={handleYoutubeClick}
-                className="w-full bg-red-600 hover:bg-red-700 text-white py-6 text-lg font-semibold rounded-lg flex items-center justify-center gap-3 transition-transform hover:scale-105"
-            >
-                <Youtube className="w-6 h-6" />
-                Subscribe on YouTube
             </Button>
         </div>
         <AlertDialogFooter>
