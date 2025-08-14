@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 const EXTERNAL_LINK = "https://linkcents.com/";
+const YOUTUBE_VIDEO_ID = "AuEmR1DXyqU";
 
 export default function GenerateSecureKeyPage() {
   const router = useRouter();
@@ -42,8 +43,6 @@ export default function GenerateSecureKeyPage() {
     router.push('/verifieduser');
   };
 
-  const videoId = "AuEmR1DXyqU";
-
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 via-white to-pink-100 font-sans p-4">
 
@@ -60,7 +59,7 @@ export default function GenerateSecureKeyPage() {
                 <iframe
                     width="100%"
                     height="100%"
-                    src={`https://www.youtube.com/embed/${videoId}`}
+                    src={`https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}`}
                     title="YouTube video player"
                     frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
