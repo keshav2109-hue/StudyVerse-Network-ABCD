@@ -101,13 +101,13 @@ export default function HomePage() {
           </p>
           <div className="flex justify-center gap-6">
             <a href="https://www.youtube.com/@EduVerse_Network" target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" size="lg" className="rounded-full border-2 border-red-500 text-red-400 hover:bg-red-500 hover:text-white transition-colors">
+              <Button size="lg" className="rounded-full bg-red-600 hover:bg-red-700 text-white transition-colors">
                 <Youtube className="w-6 h-6 mr-2" />
                 YouTube
               </Button>
             </a>
             <a href="https://t.me/EduVerse_Network" target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" size="lg" className="rounded-full border-2 border-sky-500 text-sky-400 hover:bg-sky-500 hover:text-white transition-colors">
+              <Button size="lg" className="rounded-full bg-sky-600 hover:bg-sky-700 text-white transition-colors">
                 <Send className="w-6 h-6 mr-2" />
                 Telegram
               </Button>
