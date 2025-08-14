@@ -37,7 +37,8 @@ export default function VideoPlayerLayout({
           rel="stylesheet"
         ></link>
       </head>
-      <body className="font-body antialiased">
+      {/* By using a plain body tag here, we prevent the root layout's footer from rendering */}
+      <body className="font-body antialiased bg-black">
         {children}
       </body>
     </html>

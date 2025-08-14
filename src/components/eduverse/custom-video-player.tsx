@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Hls from 'hls.js';
 import { Play, Pause, Maximize, Minimize, FastForward, Rewind, Settings, Check } from 'lucide-react';
+import Image from 'next/image';
 
 interface CustomVideoPlayerProps {
   src: string;
@@ -25,6 +26,8 @@ export function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
   const [showSettings, setShowSettings] = useState(false);
   const [activeSettingsMenu, setActiveSettingsMenu] = useState<'main' | 'speed'>('main');
   const [playbackRate, setPlaybackRate] = useState(1);
+  const [isMouseOverPlayer, setIsMouseOverPlayer] = useState(false);
+  
   let controlTimeout: NodeJS.Timeout;
 
   useEffect(() => {
@@ -49,10 +52,12 @@ export function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
     }
 
     const handleTimeUpdate = () => {
-        setProgress(video.currentTime);
-        if (progressRef.current) {
-            const value = (video.currentTime / video.duration) * 100;
-            progressRef.current.style.setProperty('--value', `${value}%`);
+        if(video.duration) {
+            setProgress(video.currentTime);
+            if (progressRef.current) {
+                const value = (video.currentTime / video.duration) * 100;
+                progressRef.current.style.setProperty('--value', `${value}%`);
+            }
         }
     };
     const handleDurationChange = () => setDuration(video.duration);
@@ -98,6 +103,9 @@ export function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
   };
 
   const formatTime = (timeInSeconds: number) => {
+    if (isNaN(timeInSeconds) || timeInSeconds < 0) {
+        return '00:00';
+    }
     const date = new Date(0);
     date.setSeconds(timeInSeconds);
     const timeString = date.toISOString().substr(11, 8);
@@ -112,10 +120,8 @@ export function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
         container.requestFullscreen().catch(err => {
             alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
         });
-        setIsFullscreen(true);
     } else {
         document.exitFullscreen();
-        setIsFullscreen(false);
     }
   }, []);
 
@@ -123,7 +129,8 @@ export function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
     setShowControls(true);
     clearTimeout(controlTimeout);
     controlTimeout = setTimeout(() => {
-      if (isPlaying) {
+      // Only hide controls if the mouse is not over the player
+      if (!isMouseOverPlayer) {
         setShowControls(false);
         setShowSettings(false);
       }
@@ -135,15 +142,16 @@ export function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
         videoRef.current.playbackRate = rate;
         setPlaybackRate(rate);
         setActiveSettingsMenu('main');
+        setShowSettings(false);
     }
   }
   
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
         if (e.target instanceof HTMLInputElement || e.target instanceof HTMLButtonElement) return;
+        e.preventDefault();
         switch (e.code) {
             case 'Space':
-                e.preventDefault();
                 togglePlayPause();
                 break;
             case 'ArrowRight':
@@ -165,7 +173,9 @@ export function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
     document.addEventListener('fullscreenchange', handleFullscreenChange);
 
     function handleClickOutside(event: MouseEvent) {
-      if (settingsMenuRef.current && !settingsMenuRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      // Also check if the click was on the settings button itself to prevent immediate closing.
+      if (settingsMenuRef.current && !settingsMenuRef.current.contains(target) && !settingsMenuRef.current.previousElementSibling?.contains(target)) {
         setShowSettings(false);
       }
     }
@@ -178,31 +188,40 @@ export function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
     }
   }, [togglePlayPause, toggleFullscreen]);
 
+
+  const shouldShowControls = showControls || !isPlaying || isMouseOverPlayer;
+
+
   return (
     <div
       ref={playerContainerRef}
       onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsMouseOverPlayer(true)}
       onMouseLeave={() => {
-        if (isPlaying) {
-            setShowControls(false);
-            setShowSettings(false);
-        }
+        setIsMouseOverPlayer(false);
+        setShowControls(false);
+        setShowSettings(false);
       }}
       className="relative w-full aspect-video bg-black flex justify-center items-center group"
     >
       <video ref={videoRef} className="w-full h-full" onClick={togglePlayPause} />
+
+       <div className="absolute top-4 right-4 z-10 opacity-70">
+          <Image src="https://theeduverse.xyz/images/Ev.jpg" alt="Eduverse Logo" width={80} height={80} className="rounded-full" />
+       </div>
+
       <div
         ref={controlsRef}
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()} // Stop click from propagating to video
         className={`absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent transition-opacity duration-300 ${
-          showControls || !isPlaying ? 'opacity-100' : 'opacity-0'
+          shouldShowControls ? 'opacity-100' : 'opacity-0'
         }`}
       >
         <input
             ref={progressRef}
             type="range"
             min="0"
-            max={duration}
+            max={duration || 0}
             value={progress}
             onChange={handleProgressChange}
             className="w-full h-1 appearance-none bg-gray-600/50 rounded-full outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-red-500 [&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:rounded-full"
@@ -220,12 +239,12 @@ export function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
 
             <div className="flex items-center gap-4">
                  <span>{formatTime(progress)} / {formatTime(duration)}</span>
-                 <div className="relative" ref={settingsMenuRef}>
-                    <button onClick={() => setShowSettings(!showSettings)}>
+                 <div className="relative">
+                    <button onClick={() => setShowSettings(prev => !prev)}>
                         <Settings size={20} />
                     </button>
                     {showSettings && (
-                        <div className="absolute bottom-full right-0 mb-2 bg-black/80 rounded-lg p-2 min-w-[150px] text-sm">
+                        <div ref={settingsMenuRef} className="absolute bottom-full right-0 mb-2 bg-black/80 rounded-lg p-2 min-w-[150px] text-sm">
                            {activeSettingsMenu === 'main' && (
                                 <>
                                     <button className="w-full text-left p-2 hover:bg-white/10 rounded-md flex justify-between">
