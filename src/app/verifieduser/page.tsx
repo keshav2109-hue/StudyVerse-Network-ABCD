@@ -10,7 +10,7 @@ const batches = [
     {
         name: 'Aarambh 2024-25 Batch',
         href: '/edu10aarambh',
-        imageUrl: 'https://i.postimg.cc/CnNr5W8b/image.png',
+        imageUrl: 'https://i.ytimg.com/vi/cFK4To0gr7Y/hq720.jpg',
         validity: '365 Days',
         price: 'Free',
         originalPrice: '',
