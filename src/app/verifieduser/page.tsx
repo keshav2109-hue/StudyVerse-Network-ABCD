@@ -61,14 +61,14 @@ export default function VerifiedUserPage() {
                 <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-center h-16">
                         <h1 className="text-2xl font-bold text-gray-800">
-                            Welcome to Eduverse!
+                            EduVerse 2.O
                         </h1>
                     </div>
                 </div>
             </header>
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
                 <p className="text-center text-gray-600 mb-6">You have successfully verified your access. Please select your batch to continue.</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6">
                     {batches.map((batch) => (
                         <BatchCard
                             key={batch.name}
