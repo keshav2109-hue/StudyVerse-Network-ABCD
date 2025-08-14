@@ -10,44 +10,109 @@ interface CustomVideoPlayerProps {
 }
 
 const playbackSpeeds = [0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3];
+const qualityLevels = {
+    '720p': 'HD',
+    '480p': '',
+    '240p': '',
+};
 
-export function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
+type Quality = keyof typeof qualityLevels;
+
+const getQualityUrl = (baseUrl: string, quality: Quality): string => {
+    // Pattern 1 & 3: .../index_X.m3u8 or .../something.m3u8
+    if (baseUrl.includes('/channel_vod_non_drm_hls/')) {
+        const base = baseUrl.substring(0, baseUrl.lastIndexOf('/') + 1);
+        switch (quality) {
+            case '240p': return `${base}index_1.m3u8`;
+            case '480p': return `${base}index_3.m3u8`;
+            case '720p': return `${base}index_4.m3u8`; // Or 5, using 4 for consistency
+            default: return baseUrl;
+        }
+    }
+
+    // Pattern 2 & 4: ..._video_VOD...
+    if (baseUrl.includes('/vod_non_drm_ios/')) {
+        const qualityRegex = /_video_VOD(\d+p\d+)?\.m3u8$/;
+        const base = baseUrl.replace(qualityRegex, '_video_VOD');
+        if (base.endsWith('_video_VOD')) {
+             switch (quality) {
+                case '240p': return `${base}240p30.m3u8`;
+                case '480p': return `${base}480p30.m3u8`;
+                case '720p': return `${base}720p30.m3u8`;
+                default: return baseUrl;
+            }
+        }
+    }
+    
+    return baseUrl; // Fallback
+};
+
+const getAvailableQualities = (url: string): Quality[] => {
+    // For now, we assume all qualities are available for all video types.
+    // A more advanced implementation might check if these URLs are valid.
+    return ['720p', '480p', '240p'];
+}
+
+
+export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLInputElement>(null);
   const settingsMenuRef = useRef<HTMLDivElement>(null);
   const controlsRef = useRef<HTMLDivElement>(null);
+  const hlsRef = useRef<Hls | null>(null);
 
+  const [src, setSrc] = useState(initialSrc);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
-  const [activeSettingsMenu, setActiveSettingsMenu] = useState<'main' | 'speed'>('main');
+  const [activeSettingsMenu, setActiveSettingsMenu] = useState<'main' | 'speed' | 'quality'>('main');
   const [playbackRate, setPlaybackRate] = useState(1);
   const [isMouseOverPlayer, setIsMouseOverPlayer] = useState(false);
   
+  const [availableQualities, setAvailableQualities] = useState<Quality[]>([]);
+  const [currentQuality, setCurrentQuality] = useState<Quality>('720p');
+
   let controlTimeout: NodeJS.Timeout;
+
+  useEffect(() => {
+    setAvailableQualities(getAvailableQualities(initialSrc));
+    // Auto-select best quality initially
+    const initialQuality: Quality = '720p';
+    setCurrentQuality(initialQuality);
+    setSrc(getQualityUrl(initialSrc, initialQuality));
+  }, [initialSrc]);
+
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
+    // Destroy existing HLS instance if it exists
+    if (hlsRef.current) {
+      hlsRef.current.destroy();
+    }
+
     const hls = new Hls();
+    hlsRef.current = hls;
 
     if (Hls.isSupported()) {
       hls.loadSource(src);
       hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        video.play().catch(e => console.error("Autoplay was prevented:", e));
-        setIsPlaying(true);
+      hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
+        if(isPlaying || video.autoplay) {
+            video.play().catch(e => console.error("Autoplay was prevented:", e));
+        }
       });
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
       video.src = src;
       video.addEventListener('loadedmetadata', () => {
-        video.play().catch(e => console.error("Autoplay was prevented:", e));
-        setIsPlaying(true);
+         if(isPlaying || video.autoplay) {
+            video.play().catch(e => console.error("Autoplay was prevented:", e));
+        }
       });
     }
 
@@ -70,7 +135,9 @@ export function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
     video.addEventListener('pause', handlePause);
 
     return () => {
-      hls.destroy();
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+      }
       video.removeEventListener('timeupdate', handleTimeUpdate);
       video.removeEventListener('durationchange', handleDurationChange);
       video.removeEventListener('play', handlePlay);
@@ -86,6 +153,7 @@ export function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
     } else {
       video.pause();
     }
+    setIsPlaying(!video.paused);
   }, []);
 
   const handleProgressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -129,8 +197,7 @@ export function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
     setShowControls(true);
     clearTimeout(controlTimeout);
     controlTimeout = setTimeout(() => {
-      // Only hide controls if the mouse is not over the player
-      if (!isMouseOverPlayer) {
+      if (!isMouseOverPlayer && isPlaying) {
         setShowControls(false);
         setShowSettings(false);
       }
@@ -141,6 +208,25 @@ export function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
     if (videoRef.current) {
         videoRef.current.playbackRate = rate;
         setPlaybackRate(rate);
+        setActiveSettingsMenu('main');
+        setShowSettings(false);
+    }
+  }
+
+  const handleSetQuality = (quality: Quality) => {
+    if (videoRef.current) {
+        const currentTime = videoRef.current.currentTime;
+        const wasPlaying = isPlaying;
+
+        setSrc(getQualityUrl(initialSrc, quality));
+        setCurrentQuality(quality);
+
+        videoRef.current.currentTime = currentTime;
+        
+        if(wasPlaying) {
+            videoRef.current.play();
+        }
+
         setActiveSettingsMenu('main');
         setShowSettings(false);
     }
@@ -174,8 +260,7 @@ export function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
 
     function handleClickOutside(event: MouseEvent) {
       const target = event.target as Node;
-      // Also check if the click was on the settings button itself to prevent immediate closing.
-      if (settingsMenuRef.current && !settingsMenuRef.current.contains(target) && !settingsMenuRef.current.previousElementSibling?.contains(target)) {
+      if (settingsMenuRef.current && !settingsMenuRef.current.contains(target) && !controlsRef.current?.contains(target)) {
         setShowSettings(false);
       }
     }
@@ -199,8 +284,12 @@ export function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
       onMouseEnter={() => setIsMouseOverPlayer(true)}
       onMouseLeave={() => {
         setIsMouseOverPlayer(false);
-        setShowControls(false);
-        setShowSettings(false);
+        if(isPlaying){
+            controlTimeout = setTimeout(() => {
+                setShowControls(false);
+                setShowSettings(false);
+            }, 3000);
+        }
       }}
       className="relative w-full aspect-video bg-black flex justify-center items-center group"
     >
@@ -212,7 +301,7 @@ export function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
 
       <div
         ref={controlsRef}
-        onClick={(e) => e.stopPropagation()} // Stop click from propagating to video
+        onClick={(e) => e.stopPropagation()} 
         className={`absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent transition-opacity duration-300 ${
           shouldShowControls ? 'opacity-100' : 'opacity-0'
         }`}
@@ -240,16 +329,16 @@ export function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
             <div className="flex items-center gap-4">
                  <span>{formatTime(progress)} / {formatTime(duration)}</span>
                  <div className="relative">
-                    <button onClick={() => setShowSettings(prev => !prev)}>
+                    <button onClick={() => { setShowSettings(prev => !prev); setActiveSettingsMenu('main'); }}>
                         <Settings size={20} />
                     </button>
                     {showSettings && (
                         <div ref={settingsMenuRef} className="absolute bottom-full right-0 mb-2 bg-black/80 rounded-lg p-2 min-w-[150px] text-sm">
                            {activeSettingsMenu === 'main' && (
                                 <>
-                                    <button className="w-full text-left p-2 hover:bg-white/10 rounded-md flex justify-between">
+                                    <button onClick={() => setActiveSettingsMenu('quality')} className="w-full text-left p-2 hover:bg-white/10 rounded-md flex justify-between">
                                         <span>Quality</span>
-                                        <span className="text-gray-400">Auto</span>
+                                        <span className="text-gray-400">{currentQuality} {qualityLevels[currentQuality as Quality] && `(${qualityLevels[currentQuality as Quality]})`}</span>
                                     </button>
                                     <button onClick={() => setActiveSettingsMenu('speed')} className="w-full text-left p-2 hover:bg-white/10 rounded-md flex justify-between">
                                         <span>Speed</span>
@@ -264,6 +353,17 @@ export function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
                                         <button key={speed} onClick={() => handleSetPlaybackRate(speed)} className="w-full text-left p-2 hover:bg-white/10 rounded-md flex items-center gap-2">
                                             {playbackRate === speed && <Check size={16} />}
                                             <span className={playbackRate !== speed ? 'ml-6' : ''}>{speed}x</span>
+                                        </button>
+                                    ))}
+                                </>
+                           )}
+                           {activeSettingsMenu === 'quality' && (
+                                <>
+                                    <button onClick={() => setActiveSettingsMenu('main')} className="w-full text-left p-2 mb-1 border-b border-gray-600">Quality</button>
+                                    {availableQualities.map(q => (
+                                        <button key={q} onClick={() => handleSetQuality(q)} className="w-full text-left p-2 hover:bg-white/10 rounded-md flex items-center gap-2">
+                                            {currentQuality === q && <Check size={16} />}
+                                            <span className={currentQuality !== q ? 'ml-6' : ''}>{q} {qualityLevels[q] && `(${qualityLevels[q]})`}</span>
                                         </button>
                                     ))}
                                 </>
