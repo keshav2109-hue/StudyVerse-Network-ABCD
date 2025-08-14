@@ -1,5 +1,5 @@
 'use client';
-import type { Metadata } from 'next';
+
 import '../globals.css';
 import { useEffect } from 'react';
 
@@ -26,6 +26,16 @@ export default function VideoPlayerLayout({
           name="description"
           content="Eduverse 2.0 - Your gateway to knowledge"
         />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter&display=swap"
+          rel="stylesheet"
+        ></link>
       </head>
       <body className="font-body antialiased">
         {children}

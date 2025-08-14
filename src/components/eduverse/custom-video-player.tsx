@@ -15,6 +15,7 @@ export function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLInputElement>(null);
   const settingsMenuRef = useRef<HTMLDivElement>(null);
+  const controlsRef = useRef<HTMLDivElement>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -158,7 +159,6 @@ export function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
     }
     window.addEventListener('keydown', handleKeyDown);
 
-    const container = playerContainerRef.current;
     const handleFullscreenChange = () => {
         setIsFullscreen(!!document.fullscreenElement);
     }
@@ -192,6 +192,8 @@ export function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
     >
       <video ref={videoRef} className="w-full h-full" onClick={togglePlayPause} />
       <div
+        ref={controlsRef}
+        onClick={(e) => e.stopPropagation()}
         className={`absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent transition-opacity duration-300 ${
           showControls || !isPlaying ? 'opacity-100' : 'opacity-0'
         }`}
