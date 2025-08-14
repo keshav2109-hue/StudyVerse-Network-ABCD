@@ -82,7 +82,7 @@ export default function CommercePage() {
                         title="Live Classes"
                         topicCount={0}
                         slug="live"
-                        imageUrl="https://theeduverse.xyz/images/Ev.jpg"
+                        imageUrl="https://i.ibb.co/LdY729c/image.png"
                         imageHint="live class"
                         href="/live"
                         isLoading={loadingSubject === 'live'}

@@ -16,7 +16,7 @@ export default function Home() {
     <main className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="animate-pulse">
         <Image
-          src="https://theeduverse.xyz/images/Ev.jpg"
+          src="https://i.ibb.co/LdY729c/image.png"
           alt="Eduverse Logo"
           width={150}
           height={150}

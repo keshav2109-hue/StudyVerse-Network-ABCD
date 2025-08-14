@@ -207,7 +207,7 @@ export function CustomVideoPlayer({ src }: CustomVideoPlayerProps) {
       <video ref={videoRef} className="w-full h-full" onClick={togglePlayPause} />
 
        <div className="absolute top-4 right-4 z-10 opacity-70">
-          <Image src="https://theeduverse.xyz/images/Ev.jpg" alt="Eduverse Logo" width={80} height={80} className="rounded-full" />
+          <Image src="https://i.ibb.co/LdY729c/image.png" alt="Eduverse Logo" width={80} height={80} className="rounded-full" />
        </div>
 
       <div

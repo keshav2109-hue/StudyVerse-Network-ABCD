@@ -64,7 +64,7 @@ export function Footer() {
             {/* Logo & Address */}
             <div className="col-12 col-sm-6 col-md-4 col-lg-2">
               <div className="footerLogo">
-                <Image src="https://theeduverse.xyz/images/Ev.jpg" alt="EduVerse" width={120} height={120} />
+                <Image src="https://i.ibb.co/LdY729c/image.png" alt="EduVerse" width={120} height={120} />
               </div>
               <div className="orgName">EduVerse Network</div>
             </div>
