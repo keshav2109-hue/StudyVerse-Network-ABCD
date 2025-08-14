@@ -21,6 +21,7 @@ export default function GenerateSecureKeyPage() {
 
   const handleGenerateClick = () => {
     localStorage.setItem('generateKeyClicked', 'true');
+    localStorage.setItem('generateKeyStartTime', Date.now().toString());
     window.location.href = EXTERNAL_LINK;
   };
   

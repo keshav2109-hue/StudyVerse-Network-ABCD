@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Copy, KeyRound, ShieldCheck, AlertTriangle, Loader, RotateCw } from 'lucide-react';
 
 const TOKEN_STORAGE_KEY = 'eduverse-secure-token';
+const MIN_WAIT_TIME_MS = 30000; // 30 seconds
 
 function MainEduPageContent() {
   const [token, setToken] = useState('');
@@ -16,42 +17,39 @@ function MainEduPageContent() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    // Check if the user came from the intended page AND clicked the button
     const fromGenerateKey = searchParams.get('from') === '/generatesecurekey';
     const hasClickedGenerate = localStorage.getItem('generateKeyClicked') === 'true';
+    const startTimeStr = localStorage.getItem('generateKeyStartTime');
+    const startTime = startTimeStr ? parseInt(startTimeStr, 10) : 0;
+    const elapsedTime = Date.now() - startTime;
 
-    if (fromGenerateKey && hasClickedGenerate) {
+    if (fromGenerateKey && hasClickedGenerate && elapsedTime >= MIN_WAIT_TIME_MS) {
       setIsVerified(true);
       
-      // Clear the flag so it cannot be reused
       localStorage.removeItem('generateKeyClicked');
+      localStorage.removeItem('generateKeyStartTime');
 
-      // Generate a random token
       const generatedToken = Math.random().toString(36).substring(2, 11).toUpperCase();
       setToken(generatedToken);
       
-      // Store the token in localStorage to be verified on the next page
       localStorage.setItem(TOKEN_STORAGE_KEY, generatedToken);
 
-    } else if (fromGenerateKey && !hasClickedGenerate) {
-      // User has bypassed the button click, show warning and redirect
-      setIsBypassed(true);
-      const timer = setInterval(() => {
-        setCountdown((prev) => prev - 1);
-      }, 1000);
-
-      const redirectTimeout = setTimeout(() => {
-        router.push('/generatesecurekey');
-      }, 5000);
-
-      // Cleanup timeouts and intervals on component unmount
-      return () => {
-        clearInterval(timer);
-        clearTimeout(redirectTimeout);
-      };
     } else {
-        // User accessed the page directly, show a different error message
        setIsBypassed(true);
+       if (fromGenerateKey) {
+            const timer = setInterval(() => {
+                setCountdown((prev) => prev - 1);
+            }, 1000);
+
+            const redirectTimeout = setTimeout(() => {
+                router.push('/generatesecurekey');
+            }, 5000);
+
+            return () => {
+                clearInterval(timer);
+                clearTimeout(redirectTimeout);
+            };
+       }
     }
   }, [searchParams, router]);
 
@@ -74,11 +72,11 @@ function MainEduPageContent() {
            <div className="flex justify-center items-center gap-2 mb-4">
             <AlertTriangle className="w-8 h-8 text-red-500" />
             <h1 className="text-2xl font-bold text-gray-800">
-              Process Bypassed
+              Process Bypassed or Timed Out
             </h1>
           </div>
           <p className="text-gray-600 mb-6">
-            You must start the process correctly. Redirecting you in {countdown} seconds...
+            Please complete the process correctly. Redirecting you in {countdown} seconds...
           </p>
           <div className="flex items-center justify-center text-red-500 mb-6">
             <RotateCw className="w-6 h-6 animate-spin" />
