@@ -12,12 +12,13 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
 import { DppCard } from "@/components/eduverse/dpp-card";
+import { aarambhVideos, aarambhNotes } from "@/lib/aarambh-data";
 
 interface Lecture {
   id: string;
   title: string;
-  notesTitle: string;
-  notesLink: string;
+  notesTitle?: string;
+  notesLink?: string;
   videoEmbedType: string;
   videoEmbedUrl: string;
 }
@@ -31,16 +32,16 @@ interface SubjectData {
   [key: string]: Topic[];
 }
 
-interface Dpp {
-  id: string;
+interface Material {
+  id?: string;
   title: string;
-  subject: string;
-  pdf_url: string;
+  subject?: string;
+  pdf_url?: string;
   download_url: string;
 }
 
 interface DppData {
-  [key: string]: Dpp[];
+  [key: string]: Material[];
 }
 
 async function getSubjectData(
@@ -65,6 +66,32 @@ async function getSubjectData(
   };
 
   const subjectName = subjectNames[slug] || "Subject";
+  
+  let formattedSlug: string;
+  if (slug === 'maths' || slug === 'mathematics') {
+    formattedSlug = 'Mathematics';
+  } else if (slug === 'business-studies') {
+    formattedSlug = 'Business Studies';
+  } else if (slug === 'accountancy') {
+    formattedSlug = 'Accountancy';
+  } else if (slug === 'social-science') {
+      formattedSlug = 'Social Science';
+  } else if (slug === 'science') {
+      formattedSlug = 'Science';
+  } else if (slug === 'sanskrit') {
+      formattedSlug = 'Sanskrit';
+  } else if (slug === 'it') {
+      formattedSlug = 'IT';
+  }
+  else {
+    formattedSlug = slug.charAt(0).toUpperCase() + slug.slice(1);
+  }
+
+  if (originPath === '/edu10aarambh') {
+    // @ts-ignore
+    const topics = aarambhVideos[formattedSlug] || [];
+    return { subjectName, topics };
+  }
 
   try {
     let url = "";
@@ -76,7 +103,7 @@ async function getSubjectData(
       url = "https://eduverseapi.vercel.app/eduverse/api/11/science";
     } else if (originPath === '/commerce') {
       url = "https://eduverseapi.vercel.app/eduverse/api/11/commerce";
-    } else if (originPath === '/edu10' || originPath === '/edu10aarambh') {
+    } else if (originPath === '/edu10') {
       url = "https://eduverseapi.vercel.app/eduverse/api/10";
     } else if (originPath === '/edu9') {
       url = "https://eduverseapi.vercel.app/eduverse/api/9";
@@ -89,26 +116,6 @@ async function getSubjectData(
       }
       const data: SubjectData = await res.json();
       
-      let formattedSlug: string;
-      if (slug === 'maths' || slug === 'mathematics') {
-        formattedSlug = 'Mathematics';
-      } else if (slug === 'business-studies') {
-        formattedSlug = 'Business Studies';
-      } else if (slug === 'accountancy') {
-        formattedSlug = 'Accountancy';
-      } else if (slug === 'social-science') {
-          formattedSlug = 'Social Science';
-      } else if (slug === 'science') {
-          formattedSlug = 'Science';
-      } else if (slug === 'sanskrit') {
-          formattedSlug = 'Sanskrit';
-      } else if (slug === 'it') {
-          formattedSlug = 'IT';
-      }
-      else {
-        formattedSlug = slug.charAt(0).toUpperCase() + slug.slice(1);
-      }
-      
       const topics = data[formattedSlug] || [];
       return { subjectName, topics };
     }
@@ -119,10 +126,14 @@ async function getSubjectData(
   return { subjectName, topics: [] };
 }
 
-async function getDppData(
+async function getMaterialsData(
   slug: string,
   originPath: string
-): Promise<Dpp[]> {
+): Promise<Material[]> {
+    if (originPath === '/edu10aarambh') {
+      return aarambhNotes.map(note => ({...note, id: note.title}));
+    }
+    
     try {
         let url = "";
         if (originPath === '/pcmb') {
@@ -157,7 +168,7 @@ async function getDppData(
             if (!res.ok) {
                 throw new Error(`Failed to fetch DPP data from ${url}`);
             }
-            const data: Dpp[] = await res.json();
+            const data: Material[] = await res.json();
             
             const subjectToFilter = subjectNameMap[slug] || (slug.charAt(0).toUpperCase() + slug.slice(1));
 
@@ -180,7 +191,7 @@ export default async function SubjectPage({
   const { slug } = params;
   const from = typeof searchParams.from === 'string' ? searchParams.from : '/pcmb';
   const { subjectName, topics } = await getSubjectData(slug, from);
-  const dpps = await getDppData(slug, from);
+  const materials = await getMaterialsData(slug, from);
 
   const subjectImages: { [key: string]: string } = {
     physics:
@@ -218,6 +229,9 @@ export default async function SubjectPage({
   const lecturesWithVideo = allLectures.filter(lecture => lecture.videoEmbedUrl);
   const lecturesWithNotes = allLectures.filter(lecture => lecture.notesLink);
 
+  const dpps = from === '/edu10aarambh' ? [] : materials;
+  const notes = from === '/edu10aarambh' ? materials : lecturesWithNotes;
+
   return (
     <div className="min-h-screen bg-gray-50 text-foreground">
       <header className="bg-white shadow-sm sticky top-0 z-10">
@@ -237,7 +251,9 @@ export default async function SubjectPage({
         <div className="grid grid-cols-1 gap-px bg-gray-100 border-t">
             {lecturesWithVideo.length > 0 ? (
                 lecturesWithVideo.map((lecture, index) => {
-                  const watchUrl = `/eduverseplay?videoUrl=${encodeURIComponent(lecture.videoEmbedUrl)}`;
+                  const watchUrl = lecture.videoEmbedType === 'youtube'
+                    ? `/watch?videoUrl=${encodeURIComponent(lecture.videoEmbedUrl)}&title=${encodeURIComponent(lecture.title)}&videoType=youtube`
+                    : `/eduverseplay?videoUrl=${encodeURIComponent(lecture.videoEmbedUrl)}`;
 
                   return (
                     <Link href={watchUrl} key={`${lecture.id}-${lecture.title}-video-${index}`} className="no-underline">
@@ -256,13 +272,20 @@ export default async function SubjectPage({
             )}
         </div>
         <div className="grid grid-cols-1 gap-4 p-4 bg-gray-100 border-t">
-            {lecturesWithNotes.length > 0 ? (
-                lecturesWithNotes.map((lecture, index) => (
+            {notes.length > 0 ? (
+                notes.map((item, index) => {
+                  const note = item as Lecture; // For old structure
+                  const material = item as Material; // For new structure
+                  
+                  const downloadUrl = note.notesLink || material.download_url;
+                  const title = note.notesTitle || note.title || material.title;
+
+                  return (
                     <a
-                        href={lecture.notesLink}
+                        href={downloadUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        key={`${lecture.id}-${lecture.title}-note-${index}`}
+                        key={`${note.id || material.id}-${title}-note-${index}`}
                         className="group block"
                     >
                         <Card className="flex items-center p-2.5 rounded-xl shadow-md transition-transform duration-200 ease-in-out group-hover:scale-[1.02] border bg-white">
@@ -275,14 +298,15 @@ export default async function SubjectPage({
                                 style={{ height: 'auto' }}
                             />
                             <div className="flex-1">
-                                <h3 className="text-sm font-semibold text-black line-clamp-2">{lecture.notesTitle || lecture.title}</h3>
+                                <h3 className="text-sm font-semibold text-black line-clamp-2">{title}</h3>
                             </div>
                             <div className="bg-gray-100 rounded-full p-2 ml-2">
                                 <Download className="h-4 w-4 text-gray-500" />
                             </div>
                         </Card>
                     </a>
-                ))
+                  )
+                })
             ) : (
                 <div className="text-center text-gray-500 mt-10 p-4 bg-white">
                     No notes available for this subject yet.
@@ -310,3 +334,4 @@ export default async function SubjectPage({
     </div>
   );
 }
+
