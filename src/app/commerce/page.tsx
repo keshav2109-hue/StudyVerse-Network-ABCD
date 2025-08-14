@@ -82,7 +82,7 @@ export default function CommercePage() {
                         title="Live Classes"
                         topicCount={0}
                         slug="live"
-                        imageUrl="https://i.ibb.co/LdY729c/image.png"
+                        imageUrl="https://i.postimg.cc/rsKZhQbz/image.png"
                         imageHint="live class"
                         href="/live"
                         isLoading={loadingSubject === 'live'}

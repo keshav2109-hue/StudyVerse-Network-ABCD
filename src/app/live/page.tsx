@@ -158,7 +158,7 @@ export default function LivePage() {
                 </div>
             )}
             <Image
-            src="https://i.ibb.co/LdY729c/image.png"
+            src="https://i.postimg.cc/rsKZhQbz/image.png"
             alt="Eduverse"
             width={80}
             height={60}

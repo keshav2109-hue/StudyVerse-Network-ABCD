@@ -76,7 +76,7 @@ export default function EduAuthPage() {
             </div>
           ) : (
             <>
-              <img src="https://i.ibb.co/LdY729c/image.png" alt="EduVerse Logo" className="w-16 mx-auto mb-3 rounded-full shadow" />
+              <img src="https://i.postimg.cc/rsKZhQbz/image.png" alt="EduVerse Logo" className="w-16 mx-auto mb-3 rounded-full shadow" />
               <h2 className="text-xl font-bold text-gray-800 mb-1 flex items-center justify-center gap-2">
                 <LockKeyhole className="w-5 h-5" />
                 EduVerse Access

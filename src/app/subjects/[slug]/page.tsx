@@ -267,7 +267,7 @@ export default async function SubjectPage({
                     >
                         <Card className="flex items-center p-2.5 rounded-xl shadow-md transition-transform duration-200 ease-in-out group-hover:scale-[1.02] border bg-white">
                             <Image
-                                src="https://i.ibb.co/LdY729c/image.png"
+                                src="https://i.postimg.cc/rsKZhQbz/image.png"
                                 alt="Eduverse"
                                 width={80}
                                 height={60}
