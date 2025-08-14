@@ -19,7 +19,7 @@ export default function VideoPlayerLayout({
   }, []);
 
   return (
-    <html lang="en" className="bg-black">
+    <html lang="en">
       <head>
         <title>Eduverse 2.0 - Player</title>
         <meta
@@ -37,6 +37,7 @@ export default function VideoPlayerLayout({
           rel="stylesheet"
         ></link>
       </head>
+      {/* By using a plain body tag here, we prevent the root layout's footer from rendering */}
       <body className="font-body antialiased">
         {children}
       </body>

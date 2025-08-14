@@ -192,7 +192,13 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
     if (!container) return;
 
     if (!document.fullscreenElement) {
-        container.requestFullscreen().catch(err => {
+        container.requestFullscreen().then(() => {
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('landscape').catch(err => {
+                    console.warn("Could not lock screen orientation:", err);
+                });
+            }
+        }).catch(err => {
             alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
         });
     } else {
