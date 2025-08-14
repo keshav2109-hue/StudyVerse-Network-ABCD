@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Copy, KeyRound, ShieldCheck, AlertTriangle, Loader, RotateCw } from 'lucide-react';
 
 const TOKEN_STORAGE_KEY = 'eduverse-secure-token';
-const MIN_WAIT_TIME_MS = 30000; // 30 seconds
+const MIN_WAIT_TIME_MS = 20000; // 20 seconds
 
 function MainEduPageContent() {
   const [token, setToken] = useState('');
