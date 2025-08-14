@@ -93,6 +93,11 @@ async function getSubjectData(
     return { subjectName, topics };
   }
 
+  // Placeholder for Abhay 2025 data
+  if (originPath === '/abhay2025') {
+    return { subjectName, topics: [] };
+  }
+
   try {
     let url = "";
     const isClass11SpecialSubject = (originPath === '/pcmb' || originPath === '/commerce') && ['maths', 'mathematics', 'english', 'hindi'].includes(slug);
@@ -132,6 +137,10 @@ async function getMaterialsData(
 ): Promise<Material[]> {
     if (originPath === '/edu10aarambh') {
       return aarambhNotes.map(note => ({...note, id: note.title}));
+    }
+
+    if (originPath === '/abhay2025') {
+      return [];
     }
     
     try {
@@ -334,4 +343,3 @@ export default async function SubjectPage({
     </div>
   );
 }
-

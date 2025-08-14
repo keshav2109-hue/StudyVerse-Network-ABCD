@@ -4,7 +4,7 @@ import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
   // Paths to protect
-  const protectedPaths = ['/pcmb', '/commerce', '/edu10', '/edu9', '/live', '/subjects', '/verifieduser', '/edu10aarambh'];
+  const protectedPaths = ['/pcmb', '/commerce', '/edu10', '/edu9', '/live', '/subjects', '/verifieduser', '/edu10aarambh', '/abhay2025'];
   const { pathname } = request.nextUrl;
 
   // Check if the current path is one of the protected paths (or a sub-path of /subjects)
@@ -27,5 +27,5 @@ export function middleware(request: NextRequest) {
 
 // See "Matching Paths" below to learn more
 export const config = {
-  matcher: ['/pcmb/:path*', '/commerce/:path*', '/edu10/:path*', '/edu9/:path*', '/live/:path*', '/subjects/:path*', '/verifieduser/:path*', '/edu10aarambh/:path*'],
+  matcher: ['/pcmb/:path*', '/commerce/:path*', '/edu10/:path*', '/edu9/:path*', '/live/:path*', '/subjects/:path*', '/verifieduser/:path*', '/edu10aarambh/:path*', '/abhay2025/:path*'],
 };

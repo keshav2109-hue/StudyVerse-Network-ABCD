@@ -52,6 +52,15 @@ const batches = [
         originalPrice: '',
         imageHint: 'class 9 batch',
     },
+    {
+        name: 'Abhay 2025',
+        href: '/abhay2025',
+        imageUrl: 'https://i.postimg.cc/6T6Fv0Zm/image.png',
+        validity: '365 Days',
+        price: 'Free',
+        originalPrice: '',
+        imageHint: 'class batch',
+    }
 ];
 
 export default function VerifiedUserPage() {
