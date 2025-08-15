@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -320,6 +321,20 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
       className="relative w-full aspect-video bg-black flex justify-center items-center group rounded-lg overflow-hidden"
     >
       <video ref={videoRef} className="w-full h-full" onClick={togglePlayPause} onPlay={showAndAutoHideControls} onPause={() => setShowControls(true)}/>
+      
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            togglePlayPause();
+          }}
+          className={`pointer-events-auto bg-black/50 text-white rounded-full p-4 transition-opacity duration-300 ${
+            isPlaying ? 'opacity-0' : 'opacity-100'
+          }`}
+        >
+          <Play size={40} className="translate-x-[2px]"/>
+        </button>
+      </div>
 
        <div className="absolute top-4 right-4 z-10 opacity-70">
           <Image src="https://i.postimg.cc/rsKZhQbz/image.png" alt="Eduverse Logo" width={80} height={80} className="rounded-full" />
@@ -332,13 +347,8 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
           showControls ? 'opacity-100' : 'opacity-0'
         }`}
       >
-        <div className="flex items-center gap-4 text-white">
-          <button onClick={togglePlayPause}>
-              {isPlaying ? <Pause size={24} /> : <Play size={24} />}
-          </button>
-          
-          <div className="flex-grow flex flex-col">
-            <input
+        <div className="flex flex-col gap-2">
+           <input
                 ref={progressRef}
                 type="range"
                 min="0"
@@ -347,57 +357,61 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
                 onChange={handleProgressChange}
                 className="w-full"
             />
-            <div className="text-xs text-white mt-1">
-                {formatTime(progress)} / {formatTime(duration)}
+            <div className="flex items-center gap-4 text-white">
+                <button onClick={togglePlayPause}>
+                    {isPlaying ? <Pause size={24} /> : <Play size={24} />}
+                </button>
+                <div className="text-xs text-white">
+                    {formatTime(progress)} / {formatTime(duration)}
+                </div>
+                <div className="flex-grow"></div>
+                <div className="relative">
+                    <button onClick={() => { setShowSettings(prev => !prev); setActiveSettingsMenu('main'); }}>
+                        <Settings size={20} />
+                    </button>
+                    {showSettings && (
+                        <div ref={settingsMenuRef} className="absolute bottom-full right-0 mb-2 bg-black/80 rounded-lg p-2 min-w-[150px] text-sm">
+                        {activeSettingsMenu === 'main' && (
+                                <>
+                                    <button onClick={() => setActiveSettingsMenu('quality')} className="w-full text-left p-2 hover:bg-white/10 rounded-md flex justify-between">
+                                        <span>Quality</span>
+                                        <span className="text-gray-400">{currentQuality} {qualityLevels[currentQuality as Quality] && `(${qualityLevels[currentQuality as Quality]})`}</span>
+                                    </button>
+                                    <button onClick={() => setActiveSettingsMenu('speed')} className="w-full text-left p-2 hover:bg-white/10 rounded-md flex justify-between">
+                                        <span>Speed</span>
+                                        <span className="text-gray-400">{playbackRate}x</span>
+                                    </button>
+                                </>
+                        )}
+                        {activeSettingsMenu === 'speed' && (
+                                <>
+                                    <button onClick={() => setActiveSettingsMenu('main')} className="w-full text-left p-2 mb-1 border-b border-gray-600">Speed</button>
+                                    {playbackSpeeds.map(speed => (
+                                        <button key={speed} onClick={() => handleSetPlaybackRate(speed)} className="w-full text-left p-2 hover:bg-white/10 rounded-md flex items-center gap-2">
+                                            {playbackRate === speed && <Check size={16} />}
+                                            <span className={playbackRate !== speed ? 'ml-6' : ''}>{speed}x</span>
+                                        </button>
+                                    ))}
+                                </>
+                        )}
+                        {activeSettingsMenu === 'quality' && (
+                                <>
+                                    <button onClick={() => setActiveSettingsMenu('main')} className="w-full text-left p-2 mb-1 border-b border-gray-600">Quality</button>
+                                    {availableQualities.map(q => (
+                                        <button key={q} onClick={() => handleSetQuality(q)} className="w-full text-left p-2 hover:bg-white/10 rounded-md flex items-center gap-2">
+                                            {currentQuality === q && <Check size={16} />}
+                                            <span className={currentQuality !== q ? 'ml-6' : ''}>{q} {qualityLevels[q] && `(${qualityLevels[q]})`}</span>
+                                        </button>
+                                    ))}
+                                </>
+                        )}
+                        </div>
+                    )}
+                </div>
+                <button onClick={toggleFullscreen}>
+                    {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
+                </button>
             </div>
-          </div>
-          
-          <div className="relative">
-              <button onClick={() => { setShowSettings(prev => !prev); setActiveSettingsMenu('main'); }}>
-                  <Settings size={20} />
-              </button>
-              {showSettings && (
-                  <div ref={settingsMenuRef} className="absolute bottom-full right-0 mb-2 bg-black/80 rounded-lg p-2 min-w-[150px] text-sm">
-                     {activeSettingsMenu === 'main' && (
-                          <>
-                              <button onClick={() => setActiveSettingsMenu('quality')} className="w-full text-left p-2 hover:bg-white/10 rounded-md flex justify-between">
-                                  <span>Quality</span>
-                                  <span className="text-gray-400">{currentQuality} {qualityLevels[currentQuality as Quality] && `(${qualityLevels[currentQuality as Quality]})`}</span>
-                              </button>
-                              <button onClick={() => setActiveSettingsMenu('speed')} className="w-full text-left p-2 hover:bg-white/10 rounded-md flex justify-between">
-                                  <span>Speed</span>
-                                  <span className="text-gray-400">{playbackRate}x</span>
-                              </button>
-                          </>
-                     )}
-                     {activeSettingsMenu === 'speed' && (
-                          <>
-                              <button onClick={() => setActiveSettingsMenu('main')} className="w-full text-left p-2 mb-1 border-b border-gray-600">Speed</button>
-                              {playbackSpeeds.map(speed => (
-                                  <button key={speed} onClick={() => handleSetPlaybackRate(speed)} className="w-full text-left p-2 hover:bg-white/10 rounded-md flex items-center gap-2">
-                                      {playbackRate === speed && <Check size={16} />}
-                                      <span className={playbackRate !== speed ? 'ml-6' : ''}>{speed}x</span>
-                                  </button>
-                              ))}
-                          </>
-                     )}
-                     {activeSettingsMenu === 'quality' && (
-                          <>
-                              <button onClick={() => setActiveSettingsMenu('main')} className="w-full text-left p-2 mb-1 border-b border-gray-600">Quality</button>
-                              {availableQualities.map(q => (
-                                  <button key={q} onClick={() => handleSetQuality(q)} className="w-full text-left p-2 hover:bg-white/10 rounded-md flex items-center gap-2">
-                                      {currentQuality === q && <Check size={16} />}
-                                      <span className={currentQuality !== q ? 'ml-6' : ''}>{q} {qualityLevels[q] && `(${qualityLevels[q]})`}</span>
-                                  </button>
-                              ))}
-                          </>
-                     )}
-                  </div>
-              )}
-           </div>
-          <button onClick={toggleFullscreen}>
-              {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
-          </button>
         </div>
       </div>
     </div>
