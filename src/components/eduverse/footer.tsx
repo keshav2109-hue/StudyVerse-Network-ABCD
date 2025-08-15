@@ -88,6 +88,15 @@ export function Footer() {
                 <li className="mb-2">
                   <Link href="/commerce">Class 11th (Commerce)</Link>
                 </li>
+                <li className="mb-2">
+                  <Link href="/edu10aarambh">10th Aarambh 2024</Link>
+                </li>
+                <li className="mb-2">
+                  <Link href="/abhay2025">Abhay 10th</Link>
+                </li>
+                <li className="mb-2">
+                  <Link href="/abhay9-2025">Abhay 9th</Link>
+                </li>
               </ul>
             </div>
           </div>
@@ -109,7 +118,7 @@ export function Footer() {
               <i className="bi bi-youtube"></i>
             </a>
             <a
-              href="https://t.me/EduVerse_Network"
+              href="https.t.me/EduVerse_Network"
               className="social-icon"
               target="_blank"
               rel="noopener noreferrer"
