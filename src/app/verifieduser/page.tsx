@@ -4,7 +4,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { BatchCard } from '@/components/eduverse/batch-card';
-import { Loader } from 'lucide-react';
+import { Loader, Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 const batches = [
     {
@@ -15,6 +17,7 @@ const batches = [
         price: 'Free',
         originalPrice: '',
         imageHint: 'class 10 batch',
+        tags: ['10'],
     },
     {
         name: 'Prarambh Batch | Science Class 11',
@@ -24,6 +27,7 @@ const batches = [
         price: 'Free',
         originalPrice: '',
         imageHint: 'science batch',
+        tags: ['11'],
     },
     {
         name: 'Aarambh 2.0 | Class 9th Batch 25-26',
@@ -33,6 +37,7 @@ const batches = [
         price: 'Free',
         originalPrice: '',
         imageHint: 'class 9 batch',
+        tags: ['9'],
     },
     {
         name: 'Prarambh Batch | Commerce Class 11',
@@ -42,6 +47,7 @@ const batches = [
         price: 'Free',
         originalPrice: '',
         imageHint: 'commerce batch',
+        tags: ['11'],
     },
     {
         name: 'Aarambh 2024-25 Batch',
@@ -51,6 +57,7 @@ const batches = [
         price: 'Free',
         originalPrice: '',
         imageHint: 'class 10 batch',
+        tags: ['10'],
     },
     {
         name: 'Abhay 10th 2025',
@@ -60,6 +67,7 @@ const batches = [
         price: 'Free',
         originalPrice: '',
         imageHint: 'class batch',
+        tags: ['10'],
     },
     {
         name: 'Abhay Class 9th 2025',
@@ -69,18 +77,28 @@ const batches = [
         price: 'Free',
         originalPrice: '',
         imageHint: 'class 9 batch',
+        tags: ['9'],
     }
 ];
+
+type FilterType = 'all' | '9' | '10' | '11';
 
 export default function VerifiedUserPage() {
     const router = useRouter();
     const [loadingBatch, setLoadingBatch] = useState<string | null>(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [activeFilter, setActiveFilter] = useState<FilterType>('all');
 
     const handleBatchClick = (href: string) => {
         setLoadingBatch(href);
-        // The loading state will be visible for a moment before navigation.
         router.push(href);
     };
+
+    const filteredBatches = batches.filter(batch => {
+        const matchesSearch = batch.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesFilter = activeFilter === 'all' || batch.tags.includes(activeFilter);
+        return matchesSearch && matchesFilter;
+    });
 
     return (
         <main className="min-h-screen bg-gray-50 text-foreground">
@@ -95,8 +113,52 @@ export default function VerifiedUserPage() {
             </header>
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
                 <p className="text-center text-gray-600 mb-6">You have successfully verified your access. Please select your batch to continue.</p>
+                
+                <div className="mb-8 space-y-4">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        <Input
+                            type="text"
+                            placeholder="Search for a batch..."
+                            className="w-full pl-10"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                    <div className="flex items-center justify-center gap-2 flex-wrap">
+                        <Button
+                            variant={activeFilter === 'all' ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setActiveFilter('all')}
+                        >
+                            All
+                        </Button>
+                        <Button
+                            variant={activeFilter === '9' ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setActiveFilter('9')}
+                        >
+                            Class 9
+                        </Button>
+                        <Button
+                            variant={activeFilter === '10' ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setActiveFilter('10')}
+                        >
+                            Class 10
+                        </Button>
+                        <Button
+                            variant={activeFilter === '11' ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setActiveFilter('11')}
+                        >
+                            Class 11
+                        </Button>
+                    </div>
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6">
-                    {batches.map((batch) => (
+                    {filteredBatches.map((batch) => (
                         <BatchCard
                             key={batch.name}
                             name={batch.name}
@@ -111,6 +173,11 @@ export default function VerifiedUserPage() {
                         />
                     ))}
                 </div>
+                {filteredBatches.length === 0 && (
+                    <div className="text-center text-gray-500 mt-10 col-span-full">
+                        <p>No batches found matching your criteria.</p>
+                    </div>
+                )}
             </div>
         </main>
     );
