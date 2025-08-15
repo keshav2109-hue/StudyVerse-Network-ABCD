@@ -8,9 +8,9 @@ import { Loader } from 'lucide-react';
 
 const batches = [
     {
-        name: 'Aarambh 2024-25 Batch',
-        href: '/edu10aarambh',
-        imageUrl: 'https://i.ytimg.com/vi/cFK4To0gr7Y/hq720.jpg',
+        name: 'Aarambh 2.0 | Class 10th Batch 25-26',
+        href: '/edu10',
+        imageUrl: 'https://dxixtlyravvxx.cloudfront.net/540/admin_v1/bundle_management/course/285939929246_10th%20aarambh%202.0%20banner%20app.jpg',
         validity: '365 Days',
         price: 'Free',
         originalPrice: '',
@@ -26,6 +26,15 @@ const batches = [
         imageHint: 'science batch',
     },
     {
+        name: 'Aarambh 2.0 | Class 9th Batch 25-26',
+        href: '/edu9',
+        imageUrl: 'https://dxixtlyravvxx.cloudfront.net/540/admin_v1/bundle_management/course/152792333113_9th%20aarambh%202.0%20banner%20app.jpg',
+        validity: '365 Days',
+        price: 'Free',
+        originalPrice: '',
+        imageHint: 'class 9 batch',
+    },
+    {
         name: 'Prarambh Batch | Commerce Class 11',
         href: '/commerce',
         imageUrl: 'https://dxixtlyravvxx.cloudfront.net/540/admin_v1/bundle_management/course/737975028610_Prarambh%20BATCh%20Commerce%2011.png',
@@ -35,22 +44,13 @@ const batches = [
         imageHint: 'commerce batch',
     },
     {
-        name: 'Aarambh 2.0 | Class 10th Batch 25-26',
-        href: '/edu10',
-        imageUrl: 'https://dxixtlyravvxx.cloudfront.net/540/admin_v1/bundle_management/course/285939929246_10th%20aarambh%202.0%20banner%20app.jpg',
+        name: 'Aarambh 2024-25 Batch',
+        href: '/edu10aarambh',
+        imageUrl: 'https://i.ytimg.com/vi/cFK4To0gr7Y/hq720.jpg',
         validity: '365 Days',
         price: 'Free',
         originalPrice: '',
         imageHint: 'class 10 batch',
-    },
-    {
-        name: 'Aarambh 2.0 | Class 9th Batch 25-26',
-        href: '/edu9',
-        imageUrl: 'https://dxixtlyravvxx.cloudfront.net/540/admin_v1/bundle_management/course/152792333113_9th%20aarambh%202.0%20banner%20app.jpg',
-        validity: '365 Days',
-        price: 'Free',
-        originalPrice: '',
-        imageHint: 'class 9 batch',
     },
     {
         name: 'Abhay 10th 2025',
