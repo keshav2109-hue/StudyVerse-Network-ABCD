@@ -110,14 +110,19 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
       hls.loadSource(src);
       hls.attachMedia(video);
       hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
-        if(isPlaying || video.autoplay) {
+        // isPlaying state is captured on mount, so it might be stale.
+        // We directly check video.paused property, but since this callback
+        // fires before play() might be called, we check if it was playing before.
+        const wasPlaying = videoRef.current ? !videoRef.current.paused : false;
+        if(wasPlaying || video.autoplay) {
             video.play().catch(e => console.error("Autoplay was prevented:", e));
         }
       });
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
       video.src = src;
       video.addEventListener('loadedmetadata', () => {
-         if(isPlaying || video.autoplay) {
+        const wasPlaying = videoRef.current ? !videoRef.current.paused : false;
+        if(wasPlaying || video.autoplay) {
             video.play().catch(e => console.error("Autoplay was prevented:", e));
         }
       });
@@ -150,7 +155,8 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
       video.removeEventListener('play', handlePlay);
       video.removeEventListener('pause', handlePause);
     };
-  }, [src, isPlaying]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [src]);
 
   const togglePlayPause = useCallback(() => {
     const video = videoRef.current;

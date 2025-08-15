@@ -2,6 +2,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { Footer } from '@/components/eduverse/footer';
 import { Header } from '@/components/eduverse/header';
 
@@ -11,6 +12,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const [appIsOn, setAppIsOn] = useState(true); // Optimistically start with true
+  const pathname = usePathname();
+
+  const isVideoPage = pathname === '/eduverseplay' || pathname === '/watch';
 
   useEffect(() => {
     const handleContextmenu = (e: MouseEvent) => {
@@ -73,9 +77,9 @@ export default function RootLayout({
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" />
       </head>
       <body className="font-body antialiased">
-        <Header />
+        {!isVideoPage && <Header />}
         {children}
-        <Footer />
+        {!isVideoPage && <Footer />}
         </body>
     </html>
   );
