@@ -58,7 +58,7 @@ export default function GenerateSecureKeyPage() {
                 <iframe
                     width="100%"
                     height="100%"
-                    src="https://www.youtube.com/embed/AuEmR1DXyqU"
+                    src="https://www.youtube-nocookie.com/embed/AuEmR1DXyqU"
                     title="YouTube video player"
                     frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
