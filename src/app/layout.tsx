@@ -9,7 +9,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [appIsOn, setAppIsOn] = useState<boolean | null>(null);
+  const [appIsOn, setAppIsOn] = useState<boolean>(true); // Optimistically start with true
 
   useEffect(() => {
     const handleContextmenu = (e: MouseEvent) => {
@@ -21,10 +21,16 @@ export default function RootLayout({
       try {
         const response = await fetch('/api/app-status', { cache: 'no-store' });
         const data = await response.json();
-        setAppIsOn(data.on);
+        if (!data.on) {
+          // Give a small delay before turning off to avoid flicker on fast networks
+          // if the user just happens to load when the app is being turned off.
+          setTimeout(() => {
+            setAppIsOn(false);
+          }, 1000); 
+        }
       } catch (error) {
-        console.error("Failed to fetch app status:", error);
-        setAppIsOn(false); // Default to off on error
+        console.error("Failed to fetch app status, defaulting to off:", error);
+        setAppIsOn(false);
       }
     };
 
@@ -35,21 +41,8 @@ export default function RootLayout({
     };
   }, []);
 
-  if (appIsOn === null) {
-    // Optional: show a loading indicator
-    return (
-        <html lang="en">
-            <body>
-                <div className="flex items-center justify-center min-h-screen bg-slate-900">
-                    {/* You can add a loader here if you want */}
-                </div>
-            </body>
-        </html>
-    );
-  }
-
   if (!appIsOn) {
-    // App is off, render nothing
+    // App is off, render a blank screen.
     return (
         <html lang="en">
             <body className="bg-black"></body>
@@ -57,6 +50,7 @@ export default function RootLayout({
     );
   }
 
+  // Render the app while the check happens or if the app is on.
   return (
     <html lang="en">
       <head>
