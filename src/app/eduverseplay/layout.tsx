@@ -24,9 +24,6 @@ export default function VideoPlayerLayout({
 
   return (
     <>
-        <head>
-            <title>Eduverse 2.0 - Player</title>
-        </head>
         <div className="font-body antialiased bg-black">
             {children}
         </div>
