@@ -101,6 +101,8 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
 
     let hls: Hls | null = hlsRef.current;
 
+    const wasPlaying = isPlaying;
+
     if (Hls.isSupported()) {
         if (hls) {
             hls.destroy();
@@ -161,7 +163,6 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
     } else {
       video.pause();
     }
-    setIsPlaying(!video.paused);
   }, []);
 
   const handleProgressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
