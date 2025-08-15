@@ -19,7 +19,7 @@ export default function RootLayout({
 
     const checkAppStatus = async () => {
       try {
-        const response = await fetch('https://eduverseapi.vercel.app/eduverse/api/onoroff', { cache: 'no-store' });
+        const response = await fetch('/api/app-status', { cache: 'no-store' });
         const data = await response.json();
         setAppIsOn(data.on);
       } catch (error) {
