@@ -53,9 +53,9 @@ const batches = [
         imageHint: 'class 9 batch',
     },
     {
-        name: 'Abhay 2025',
+        name: 'Abhay 10th 2025',
         href: '/abhay2025',
-        imageUrl: 'https://i.postimg.cc/6T6Fv0Zm/image.png',
+        imageUrl: 'https://i.postimg.cc/pVKv3cLR/667423824369-IMG-9619.png',
         validity: '365 Days',
         price: 'Free',
         originalPrice: '',
