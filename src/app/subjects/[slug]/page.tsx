@@ -269,11 +269,11 @@ export default async function SubjectPage({
                     : `/eduverseplay?videoUrl=${encodeURIComponent(lecture.videoEmbedUrl)}`;
                     
                    if (from === '/abhay2025' && lecture.videoEmbedType !== 'youtube') {
-                        watchUrl = lecture.videoEmbedUrl;
+                        watchUrl = `/eduverseplay?videoUrl=${encodeURIComponent(lecture.videoEmbedUrl)}`;
                    }
 
                   return (
-                    <Link href={watchUrl} key={`${lecture.id}-${lecture.title}-video-${index}`} className="no-underline" target={from === '/abhay2025' && lecture.videoEmbedType !== 'youtube' ? '_blank' : '_self'}>
+                    <Link href={watchUrl} key={`${lecture.id}-${lecture.title}-video-${index}`} className="no-underline" target={from === '/abhay2025' && lecture.videoEmbedType === 'youtube' ? '_blank' : '_self'}>
                       <TopicCard
                         title={lecture.title}
                         imageUrl={subjectImages[slug] || defaultImageUrl}
