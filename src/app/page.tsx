@@ -69,13 +69,24 @@ export default function HomePage() {
             <p className="text-lg md:text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
               Your Gateway to Unlocking Academic Excellence. High-quality education, completely free.
             </p>
-            <Button
-              onClick={handleExploreCourses}
-              size="lg"
-              className="bg-cyan-500 hover:bg-cyan-600 text-white font-semibold px-8 py-6 text-lg rounded-full transition-transform hover:scale-105 shadow-lg shadow-cyan-500/20"
-            >
-              Explore Courses <ArrowRight className="ml-2" />
-            </Button>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Button
+                onClick={handleExploreCourses}
+                size="lg"
+                className="bg-cyan-500 hover:bg-cyan-600 text-white font-semibold px-8 py-6 text-lg rounded-full transition-transform hover:scale-105 shadow-lg shadow-cyan-500/20"
+              >
+                Explore Courses <ArrowRight className="ml-2" />
+              </Button>
+              <a href="https://t.me/BookVerse_ProBot" target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="bg-transparent border-cyan-500 text-cyan-500 hover:bg-cyan-500/10 hover:text-cyan-400 font-semibold px-8 py-6 text-lg rounded-full transition-transform hover:scale-105 w-full"
+                >
+                  Explore Books <BookOpen className="ml-2" />
+                </Button>
+              </a>
+            </div>
           </div>
         </section>
 
