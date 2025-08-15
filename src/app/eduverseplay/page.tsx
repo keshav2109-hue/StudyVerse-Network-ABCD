@@ -1,21 +1,23 @@
 
 'use client';
 
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Suspense, useState } from 'react';
 import { CustomVideoPlayer } from '@/components/eduverse/custom-video-player';
 import { VideoDownloader } from '@/components/eduverse/video-downloader';
 import { VideoNotes } from '@/components/eduverse/video-notes';
 import { Button } from '@/components/ui/button';
-import { FileText, Download } from 'lucide-react';
+import { FileText, Download, Type, Brush } from 'lucide-react';
 import type { Quality } from '@/components/eduverse/custom-video-player';
 import { getQualityUrl } from '@/components/eduverse/custom-video-player';
+import Link from 'next/link';
 
 function EduversePlayPageContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const videoUrl = searchParams.get('videoUrl');
 
-  const [showNotes, setShowNotes] = useState(false);
+  const [noteMode, setNoteMode] = useState<'hidden' | 'select' | 'typing'>('hidden');
   const [downloadStatus, setDownloadStatus] = useState('Ready');
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -100,6 +102,14 @@ function EduversePlayPageContent() {
     }
   };
 
+  const toggleNoteSelector = () => {
+    setNoteMode(prev => {
+        if (prev === 'hidden') return 'select';
+        if (prev === 'typing') return 'select';
+        return 'hidden';
+    });
+  };
+
   if (!videoUrl) {
     return (
       <div className="flex items-center justify-center h-full text-white">Invalid video URL.</div>
@@ -113,7 +123,7 @@ function EduversePlayPageContent() {
       </div>
 
       <div className="w-full max-w-4xl p-4 flex justify-center items-center gap-8 bg-gray-900/50">
-        <Button variant="ghost" className="flex flex-col items-center h-auto text-white hover:text-cyan-400 gap-1" onClick={() => setShowNotes(!showNotes)}>
+        <Button variant="ghost" className="flex flex-col items-center h-auto text-white hover:text-cyan-400 gap-1" onClick={toggleNoteSelector}>
             <FileText className="w-6 h-6" />
             <span>Notes</span>
         </Button>
@@ -132,7 +142,24 @@ function EduversePlayPageContent() {
         </div>
       )}
       
-      {showNotes && (
+      {noteMode === 'select' && (
+         <div className="w-full max-w-4xl p-4 flex justify-center items-center gap-4 bg-gray-900/50 border-t border-gray-800">
+            <Button variant="outline" className="bg-slate-700 border-slate-600 hover:bg-slate-600 text-white" onClick={() => setNoteMode('typing')}>
+                <Type className="mr-2 h-4 w-4" />
+                Type Notes
+            </Button>
+            <Link href={`/draw-notes?videoId=${encodeURIComponent(videoUrl)}`} passHref>
+                <Button asChild variant="outline" className="bg-slate-700 border-slate-600 hover:bg-slate-600 text-white">
+                    <a>
+                        <Brush className="mr-2 h-4 w-4" />
+                        Draw Notes
+                    </a>
+                </Button>
+            </Link>
+         </div>
+      )}
+
+      {noteMode === 'typing' && (
         <div className="w-full max-w-4xl p-4">
           <VideoNotes videoId={videoUrl} />
         </div>

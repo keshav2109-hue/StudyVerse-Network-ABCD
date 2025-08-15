@@ -35,8 +35,6 @@ export function VideoNotes({ videoId }: VideoNotesProps) {
       toast({
         title: "Notes Saved!",
         description: "Your notes have been saved in this browser.",
-        variant: 'default',
-        duration: 3000,
       });
     } catch (error) {
       console.error("Could not save notes to local storage:", error);

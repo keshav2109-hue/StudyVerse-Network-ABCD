@@ -6,6 +6,8 @@ import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { Footer } from '@/components/eduverse/footer';
 import { Header } from '@/components/eduverse/header';
+import { Toaster } from '@/components/ui/toaster';
+
 
 export default function RootLayout({
   children,
@@ -15,7 +17,7 @@ export default function RootLayout({
   const [appIsOn, setAppIsOn] = useState(true); // Optimistically start with true
   const pathname = usePathname();
 
-  const isVideoPage = pathname === '/eduverseplay' || pathname === '/watch';
+  const isPlayerPage = pathname === '/eduverseplay' || pathname === '/watch' || pathname === '/draw-notes';
   const isSubjectPage = pathname.startsWith('/subjects/');
 
   useEffect(() => {
@@ -79,9 +81,10 @@ export default function RootLayout({
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" />
       </head>
       <body className="font-body antialiased">
-        {!isVideoPage && !isSubjectPage && <Header />}
+        {!isPlayerPage && <Header />}
+        <Toaster />
         {children}
-        {!isVideoPage && <Footer />}
+        {!isPlayerPage && <Footer />}
         </body>
     </html>
   );
