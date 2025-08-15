@@ -8,6 +8,7 @@ import { Award, BookOpen, Users, Youtube, Send, ArrowRight } from 'lucide-react'
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { CommunityPrompt } from '@/components/eduverse/community-prompt';
+import { useToast } from '@/hooks/use-toast';
 
 const features = [
   {
@@ -32,8 +33,14 @@ const COMMUNITY_PROMPT_STORAGE_KEY = 'communityPromptLastShown';
 export default function HomePage() {
   const router = useRouter();
   const [isPromptOpen, setIsPromptOpen] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
+    toast({
+      title: "Website Updated",
+      description: "This website is now updated.",
+    });
+    
     const lastShownStr = localStorage.getItem(COMMUNITY_PROMPT_STORAGE_KEY);
     const lastShown = lastShownStr ? parseInt(lastShownStr, 10) : 0;
     const oneDay = 24 * 60 * 60 * 1000;
