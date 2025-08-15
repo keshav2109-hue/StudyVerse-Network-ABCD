@@ -414,3 +414,4 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
     </div>
   );
 }
+
