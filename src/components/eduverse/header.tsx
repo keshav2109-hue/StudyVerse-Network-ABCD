@@ -103,7 +103,7 @@ export function Header() {
                 </div>
 
                 <div className="w-1/2 text-center">
-                    <h1 className="text-xl font-bold text-gray-800">EduVerse 2.0</h1>
+                   
                 </div>
 
                 <div className="w-1/4 flex justify-end">
