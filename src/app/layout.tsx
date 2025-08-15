@@ -9,7 +9,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [appIsOn, setAppIsOn] = useState<boolean>(true); // Optimistically start with true
+  const [appIsOn, setAppIsOn] = useState(true); // Optimistically start with true
 
   useEffect(() => {
     const handleContextmenu = (e: MouseEvent) => {
@@ -20,13 +20,14 @@ export default function RootLayout({
     const checkAppStatus = async () => {
       try {
         const response = await fetch('/api/app-status', { cache: 'no-store' });
-        const data = await response.json();
-        if (!data.on) {
-          // Give a small delay before turning off to avoid flicker on fast networks
-          // if the user just happens to load when the app is being turned off.
-          setTimeout(() => {
+        if (response.ok) {
+            const data = await response.json();
+            if (data.on === false) { // Explicitly check for false
+                setAppIsOn(false);
+            }
+        } else {
+             // If API fails, default to off
             setAppIsOn(false);
-          }, 1000); 
         }
       } catch (error) {
         console.error("Failed to fetch app status, defaulting to off:", error);
@@ -42,7 +43,6 @@ export default function RootLayout({
   }, []);
 
   if (!appIsOn) {
-    // App is off, render a blank screen.
     return (
         <html lang="en">
             <body className="bg-black"></body>
@@ -50,7 +50,6 @@ export default function RootLayout({
     );
   }
 
-  // Render the app while the check happens or if the app is on.
   return (
     <html lang="en">
       <head>
