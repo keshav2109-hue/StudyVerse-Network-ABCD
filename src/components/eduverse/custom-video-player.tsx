@@ -329,10 +329,10 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
             togglePlayPause();
           }}
           className={`pointer-events-auto bg-black/50 text-white rounded-full p-4 transition-opacity duration-300 ${
-            isPlaying ? 'opacity-0' : 'opacity-100'
+            isPlaying ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'
           }`}
         >
-          <Play size={40} className="translate-x-[2px]"/>
+          {isPlaying ? <Pause size={40} /> : <Play size={40} className="translate-x-[2px]"/>}
         </button>
       </div>
 
@@ -358,9 +358,6 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
                 className="w-full"
             />
             <div className="flex items-center gap-4 text-white">
-                <button onClick={togglePlayPause}>
-                    {isPlaying ? <Pause size={24} /> : <Play size={24} />}
-                </button>
                 <div className="text-xs text-white">
                     {formatTime(progress)} / {formatTime(duration)}
                 </div>
