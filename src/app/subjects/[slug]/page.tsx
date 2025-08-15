@@ -14,6 +14,7 @@ import Image from "next/image";
 import { DppCard } from "@/components/eduverse/dpp-card";
 import { aarambhVideos, aarambhNotes } from "@/lib/aarambh-data";
 import { abhayVideos, abhayNotes } from "@/lib/abhay-data";
+import { abhay9Videos, abhay9Notes } from "@/lib/abhay9-data";
 
 interface Lecture {
   id: string;
@@ -100,6 +101,12 @@ async function getSubjectData(
     return { subjectName, topics };
   }
 
+  if (originPath === '/abhay9-2025') {
+    // @ts-ignore
+    const topics = abhay9Videos[slug] || [];
+    return { subjectName, topics };
+  }
+
   try {
     let url = "";
     const isClass11SpecialSubject = (originPath === '/pcmb' || originPath === '/commerce') && ['maths', 'mathematics', 'english', 'hindi'].includes(slug);
@@ -144,6 +151,11 @@ async function getMaterialsData(
     if (originPath === '/abhay2025') {
       // @ts-ignore
       return abhayNotes[slug] || [];
+    }
+
+    if (originPath === '/abhay9-2025') {
+        // @ts-ignore
+        return abhay9Notes[slug] || [];
     }
     
     try {
@@ -241,7 +253,7 @@ export default async function SubjectPage({
   const lecturesWithVideo = allLectures.filter(lecture => lecture.videoEmbedUrl);
   const lecturesWithNotes = allLectures.filter(lecture => lecture.notesLink);
 
-  const isAbhayOrAarambh = from === '/edu10aarambh' || from === '/abhay2025';
+  const isAbhayOrAarambh = from === '/edu10aarambh' || from === '/abhay2025' || from === '/abhay9-2025';
   const dpps = isAbhayOrAarambh ? [] : materials;
   const notes = isAbhayOrAarambh ? materials : lecturesWithNotes;
 
@@ -268,12 +280,12 @@ export default async function SubjectPage({
                     ? `/watch?videoUrl=${encodeURIComponent(lecture.videoEmbedUrl)}&title=${encodeURIComponent(lecture.title)}&videoType=youtube`
                     : `/eduverseplay?videoUrl=${encodeURIComponent(lecture.videoEmbedUrl)}`;
                     
-                   if (from === '/abhay2025' && lecture.videoEmbedType !== 'youtube') {
+                   if ((from === '/abhay2025' || from === '/abhay9-2025') && lecture.videoEmbedType !== 'youtube') {
                         watchUrl = `/eduverseplay?videoUrl=${encodeURIComponent(lecture.videoEmbedUrl)}`;
                    }
 
                   return (
-                    <Link href={watchUrl} key={`${lecture.id}-${lecture.title}-video-${index}`} className="no-underline" target={from === '/abhay2025' && lecture.videoEmbedType === 'youtube' ? '_blank' : '_self'}>
+                    <Link href={watchUrl} key={`${lecture.id}-${lecture.title}-video-${index}`} className="no-underline" target={(from === '/abhay2025' || from === '/abhay9-2025') && lecture.videoEmbedType === 'youtube' ? '_blank' : '_self'}>
                       <TopicCard
                         title={lecture.title}
                         imageUrl={subjectImages[slug] || defaultImageUrl}

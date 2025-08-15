@@ -60,6 +60,15 @@ const batches = [
         price: 'Free',
         originalPrice: '',
         imageHint: 'class batch',
+    },
+    {
+        name: 'Abhay Class 9th 2025',
+        href: '/abhay9-2025',
+        imageUrl: 'https://i.postimg.cc/SR7Fbsxh/78589124373-67499f10f203a-abhay-9th-new-1.png',
+        validity: '365 Days',
+        price: 'Free',
+        originalPrice: '',
+        imageHint: 'class 9 batch',
     }
 ];
 
