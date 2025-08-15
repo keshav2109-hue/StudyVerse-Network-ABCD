@@ -17,7 +17,7 @@ const qualityLevels = {
     '240p': '',
 };
 
-export type Quality = keyof typeof typeof qualityLevels;
+export type Quality = keyof typeof qualityLevels;
 
 export const getQualityUrl = (baseUrl: string, quality: Quality): string => {
     // Treat the original URL as 720p
