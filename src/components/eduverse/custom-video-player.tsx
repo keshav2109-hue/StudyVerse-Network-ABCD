@@ -98,33 +98,31 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
     const video = videoRef.current;
     if (!video) return;
 
-    // Destroy existing HLS instance if it exists
-    if (hlsRef.current) {
-      hlsRef.current.destroy();
-    }
-
-    const hls = new Hls();
-    hlsRef.current = hls;
+    let hls: Hls | null = hlsRef.current;
 
     if (Hls.isSupported()) {
-      hls.loadSource(src);
-      hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
-        const wasPlaying = !video.paused;
-        if(wasPlaying || video.autoplay) {
-            video.play().catch(e => console.error("Autoplay was prevented:", e));
+        if (hls) {
+            hls.destroy();
         }
-      });
+        hls = new Hls();
+        hlsRef.current = hls;
+        hls.loadSource(src);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
+            const wasPlaying = !video.paused;
+            if (wasPlaying || video.autoplay) {
+                video.play().catch(e => console.error("Autoplay was prevented:", e));
+            }
+        });
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      video.src = src;
-      video.addEventListener('loadedmetadata', () => {
-        const wasPlaying = !video.paused;
-        if(wasPlaying || video.autoplay) {
-            video.play().catch(e => console.error("Autoplay was prevented:", e));
-        }
-      });
+        video.src = src;
+        video.addEventListener('loadedmetadata', () => {
+            const wasPlaying = !video.paused;
+            if (wasPlaying || video.autoplay) {
+                video.play().catch(e => console.error("Autoplay was prevented:", e));
+            }
+        });
     }
-
     const handleTimeUpdate = () => {
         if(video.duration) {
             setProgress(video.currentTime);
@@ -338,16 +336,22 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
           <button onClick={togglePlayPause}>
               {isPlaying ? <Pause size={24} /> : <Play size={24} />}
           </button>
-          <input
-              ref={progressRef}
-              type="range"
-              min="0"
-              max={duration || 0}
-              value={progress}
-              onChange={handleProgressChange}
-              className="w-full"
-          />
-          <span>{formatTime(progress)} / {formatTime(duration)}</span>
+          
+          <div className="flex-grow flex flex-col">
+            <input
+                ref={progressRef}
+                type="range"
+                min="0"
+                max={duration || 0}
+                value={progress}
+                onChange={handleProgressChange}
+                className="w-full"
+            />
+            <div className="text-xs text-white mt-1">
+                {formatTime(progress)} / {formatTime(duration)}
+            </div>
+          </div>
+          
           <div className="relative">
               <button onClick={() => { setShowSettings(prev => !prev); setActiveSettingsMenu('main'); }}>
                   <Settings size={20} />
