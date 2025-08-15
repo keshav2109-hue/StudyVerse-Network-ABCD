@@ -150,10 +150,10 @@ function EduversePlayPageContent() {
             </Button>
             <Link href={`/draw-notes?videoId=${encodeURIComponent(videoUrl)}`} passHref>
                 <Button asChild variant="outline" className="bg-slate-700 border-slate-600 hover:bg-slate-600 text-white">
-                    <a>
+                    <span>
                         <Brush className="mr-2 h-4 w-4" />
                         Draw Notes
-                    </a>
+                    </span>
                 </Button>
             </Link>
          </div>
