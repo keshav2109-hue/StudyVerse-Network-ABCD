@@ -17,9 +17,9 @@ const qualityLevels = {
     '240p': '',
 };
 
-type Quality = keyof typeof qualityLevels;
+export type Quality = keyof typeof typeof qualityLevels;
 
-const getQualityUrl = (baseUrl: string, quality: Quality): string => {
+export const getQualityUrl = (baseUrl: string, quality: Quality): string => {
     // Treat the original URL as 720p
     if (quality === '720p') {
         return baseUrl;
@@ -55,7 +55,7 @@ const getQualityUrl = (baseUrl: string, quality: Quality): string => {
     return baseUrl; 
 };
 
-const getAvailableQualities = (url: string): Quality[] => {
+export const getAvailableQualities = (url: string): Quality[] => {
     // For now, we assume all qualities are available for all video types.
     // A more advanced implementation might check if these URLs are valid.
     return ['720p', '480p', '240p'];
@@ -414,4 +414,3 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
     </div>
   );
 }
-

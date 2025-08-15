@@ -1,8 +1,23 @@
+
 'use client';
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, Loader } from 'lucide-react';
+import { getQualityUrl, getAvailableQualities, type Quality } from './custom-video-player';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 interface VideoDownloaderProps {
   videoUrl: string;
@@ -12,6 +27,9 @@ export function VideoDownloader({ videoUrl }: VideoDownloaderProps) {
   const [status, setStatus] = useState('Ready');
   const [progress, setProgress] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [selectedQuality, setSelectedQuality] = useState<Quality>('720p');
+  
+  const availableQualities = getAvailableQualities(videoUrl);
 
   async function downloadVideo() {
     setIsDownloading(true);
@@ -19,11 +37,13 @@ export function VideoDownloader({ videoUrl }: VideoDownloaderProps) {
     setProgress(0);
 
     try {
+      const urlToDownload = getQualityUrl(videoUrl, selectedQuality);
       setStatus('Fetching video information...');
-      const playlistResponse = await fetch(videoUrl);
+      const playlistResponse = await fetch(urlToDownload);
       if (!playlistResponse.ok) throw new Error(`Failed to fetch playlist: ${playlistResponse.statusText}`);
       const playlistText = await playlistResponse.text();
-      const baseUrl = videoUrl.substring(0, videoUrl.lastIndexOf('/') + 1);
+      
+      const baseUrl = urlToDownload.substring(0, urlToDownload.lastIndexOf('/') + 1);
 
       const segmentUrls = playlistText
         .split('\n')
@@ -67,7 +87,7 @@ export function VideoDownloader({ videoUrl }: VideoDownloaderProps) {
       const downloadUrl = URL.createObjectURL(videoBlob);
       const a = document.createElement('a');
       a.href = downloadUrl;
-      a.download = `eduverse_video.mp4`;
+      a.download = `eduverse_video_${selectedQuality}.mp4`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -91,37 +111,53 @@ export function VideoDownloader({ videoUrl }: VideoDownloaderProps) {
   }
 
   return (
-    <div className="w-full text-white bg-gray-900 p-4 rounded-lg">
-      <h3 className="text-lg font-semibold mb-2">Download Video</h3>
-      <Button onClick={downloadVideo} disabled={isDownloading} className="w-full bg-blue-600 hover:bg-blue-700">
-        {isDownloading ? (
-          <>
-            <Loader className="animate-spin mr-2" />
-            Downloading...
-          </>
-        ) : (
-          <>
-            <Download className="mr-2" />
-            Download Video
-          </>
-        )}
-      </Button>
-      {isDownloading && (
-        <div className="mt-4">
-          <div className="w-full bg-gray-700 rounded-full h-2.5">
-            <div
-              className="bg-blue-500 h-2.5 rounded-full"
-              style={{ width: `${progress}%`, transition: 'width 0.2s' }}
-            ></div>
-          </div>
-          <p className="text-center text-sm text-gray-400 mt-2">{status}</p>
-        </div>
-      )}
-      {!isDownloading && status !== 'Ready' && (
-         <p className={`text-center text-sm mt-2 ${status.startsWith('Error') ? 'text-red-400' : 'text-green-400'}`}>
-            {status}
-        </p>
-      )}
-    </div>
+    <>
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button variant="ghost" className="flex flex-col items-center h-auto text-white hover:text-cyan-400 gap-1">
+            <Download className="w-6 h-6" />
+            <span>Download</span>
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent className="bg-slate-800 text-white border-slate-700">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Select Download Quality</AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-400">
+              Choose the quality for the video you want to download. Higher quality will result in a larger file size.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <RadioGroup defaultValue={selectedQuality} onValueChange={(q: Quality) => setSelectedQuality(q)} className="my-4">
+            {availableQualities.map((quality) => (
+              <div key={quality} className="flex items-center space-x-2">
+                <RadioGroupItem value={quality} id={`q-${quality}`} className="text-cyan-400 border-cyan-400" />
+                <Label htmlFor={`q-${quality}`} className="text-white">{quality}</Label>
+              </div>
+            ))}
+          </RadioGroup>
+          {isDownloading && (
+            <div className="mt-4">
+              <div className="w-full bg-gray-700 rounded-full h-2.5">
+                <div
+                  className="bg-cyan-500 h-2.5 rounded-full"
+                  style={{ width: `${progress}%`, transition: 'width 0.2s' }}
+                ></div>
+              </div>
+              <p className="text-center text-sm text-gray-400 mt-2">{status}</p>
+            </div>
+          )}
+          {!isDownloading && status !== 'Ready' && (
+            <p className={`text-center text-sm mt-2 ${status.startsWith('Error') ? 'text-red-400' : 'text-green-400'}`}>
+                {status}
+            </p>
+          )}
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-slate-700 hover:bg-slate-600 border-0">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={downloadVideo} disabled={isDownloading} className="bg-cyan-500 hover:bg-cyan-600">
+              {isDownloading ? <Loader className="animate-spin" /> : 'Download'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
