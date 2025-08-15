@@ -27,12 +27,12 @@ export default function RootLayout({
                 setAppIsOn(false);
             }
         } else {
-             // If API fails, default to off
-            setAppIsOn(false);
+             // If API fails, default to on to avoid blocking users
+            setAppIsOn(true);
         }
       } catch (error) {
-        console.error("Failed to fetch app status, defaulting to off:", error);
-        setAppIsOn(false);
+        console.error("Failed to fetch app status, defaulting to on:", error);
+        setAppIsOn(true);
       }
     };
 
