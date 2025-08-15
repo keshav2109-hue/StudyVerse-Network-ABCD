@@ -68,6 +68,8 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
   const settingsMenuRef = useRef<HTMLDivElement>(null);
   const controlsRef = useRef<HTMLDivElement>(null);
   const hlsRef = useRef<Hls | null>(null);
+  const controlTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
 
   const [src, setSrc] = useState(initialSrc);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -78,12 +80,10 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
   const [showSettings, setShowSettings] = useState(false);
   const [activeSettingsMenu, setActiveSettingsMenu] = useState<'main' | 'speed' | 'quality'>('main');
   const [playbackRate, setPlaybackRate] = useState(1);
-  const [isMouseOverPlayer, setIsMouseOverPlayer] = useState(false);
   
   const [availableQualities, setAvailableQualities] = useState<Quality[]>([]);
   const [currentQuality, setCurrentQuality] = useState<Quality>('720p');
 
-  let controlTimeout: NodeJS.Timeout;
 
   useEffect(() => {
     setAvailableQualities(getAvailableQualities(initialSrc));
@@ -206,16 +206,38 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
     }
   }, []);
 
-  const handleMouseMove = () => {
-    setShowControls(true);
-    clearTimeout(controlTimeout);
-    controlTimeout = setTimeout(() => {
-      if (isPlaying && !isMouseOverPlayer) {
-        setShowControls(false);
-        setShowSettings(false);
-      }
-    }, 3000);
+  const hideControls = () => {
+    if (videoRef.current && !videoRef.current.paused) {
+      setShowControls(false);
+    }
   };
+
+  const showAndAutoHideControls = useCallback(() => {
+    setShowControls(true);
+    if (controlTimeoutRef.current) {
+      clearTimeout(controlTimeoutRef.current);
+    }
+    controlTimeoutRef.current = setTimeout(hideControls, 3000);
+  }, []);
+
+  useEffect(() => {
+    const container = playerContainerRef.current;
+    if (container) {
+      container.addEventListener('mousemove', showAndAutoHideControls);
+      container.addEventListener('mouseleave', hideControls);
+    }
+
+    return () => {
+      if (controlTimeoutRef.current) {
+        clearTimeout(controlTimeoutRef.current);
+      }
+      if (container) {
+        container.removeEventListener('mousemove', showAndAutoHideControls);
+        container.removeEventListener('mouseleave', hideControls);
+      }
+    };
+  }, [showAndAutoHideControls]);
+
 
   const handleSetPlaybackRate = (rate: number) => {
     if (videoRef.current) {
@@ -254,6 +276,7 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
     const handleKeyDown = (e: KeyboardEvent) => {
         if (e.target instanceof HTMLInputElement || e.target instanceof HTMLButtonElement) return;
         e.preventDefault();
+        showAndAutoHideControls();
         switch (e.code) {
             case 'Space':
                 togglePlayPause();
@@ -289,29 +312,14 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
         document.removeEventListener('fullscreenchange', handleFullscreenChange);
         document.removeEventListener("mousedown", handleClickOutside);
     }
-  }, [togglePlayPause, toggleFullscreen]);
-
-
-  const shouldShowControls = showControls || !isPlaying || isMouseOverPlayer;
-
+  }, [togglePlayPause, toggleFullscreen, showAndAutoHideControls]);
 
   return (
     <div
       ref={playerContainerRef}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsMouseOverPlayer(true)}
-      onMouseLeave={() => {
-        setIsMouseOverPlayer(false);
-        if(isPlaying){
-            controlTimeout = setTimeout(() => {
-                setShowControls(false);
-                setShowSettings(false);
-            }, 3000);
-        }
-      }}
       className="relative w-full aspect-video bg-black flex justify-center items-center group rounded-lg overflow-hidden"
     >
-      <video ref={videoRef} className="w-full h-full" onClick={togglePlayPause} />
+      <video ref={videoRef} className="w-full h-full" onClick={togglePlayPause} onPlay={showAndAutoHideControls} onPause={() => setShowControls(true)}/>
 
        <div className="absolute top-4 right-4 z-10 opacity-70">
           <Image src="https://i.postimg.cc/rsKZhQbz/image.png" alt="Eduverse Logo" width={80} height={80} className="rounded-full" />
@@ -321,7 +329,7 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
         ref={controlsRef}
         onClick={(e) => e.stopPropagation()} 
         className={`absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent transition-opacity duration-300 ${
-          shouldShowControls ? 'opacity-100' : 'opacity-0'
+          showControls ? 'opacity-100' : 'opacity-0'
         }`}
       >
         <input
@@ -331,8 +339,7 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
             max={duration || 0}
             value={progress}
             onChange={handleProgressChange}
-            className="w-full h-1 appearance-none bg-gray-600/50 rounded-full outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-red-500 [&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:rounded-full"
-            style={{backgroundSize: `${(progress / duration) * 100}% 100%`}}
+            className="w-full"
         />
 
         <div className="flex items-center justify-between text-white mt-2">
