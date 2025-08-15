@@ -14,12 +14,10 @@ export default function VideoPlayerLayout({
     };
     document.addEventListener('contextmenu', handleContextmenu);
 
-    // Apply class to body when this layout is active
     document.body.classList.add('bg-black');
     
     return () => {
       document.removeEventListener('contextmenu', handleContextmenu);
-      // Clean up class from body when this layout is no longer active
       document.body.classList.remove('bg-black');
     };
   }, []);
