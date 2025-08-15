@@ -4,7 +4,7 @@
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Award, BookOpen, Users, Youtube, Send, ArrowRight } from 'lucide-react';
+import { Award, BookOpen, Users, Youtube, Send, ArrowRight, Loader } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { CommunityPrompt } from '@/components/eduverse/community-prompt';
@@ -34,6 +34,8 @@ export default function HomePage() {
   const router = useRouter();
   const [isPromptOpen, setIsPromptOpen] = useState(false);
   const { toast } = useToast();
+  const [isCheckingKey, setIsCheckingKey] = useState(false);
+
 
   useEffect(() => {
     toast({
@@ -52,8 +54,23 @@ export default function HomePage() {
   }, []);
 
 
-  const handleExploreCourses = () => {
-    router.push('/generatesecurekey');
+  const handleExploreCourses = async () => {
+    setIsCheckingKey(true);
+    try {
+      const response = await fetch('/api/key-status');
+      const data = await response.json();
+
+      if (data.on === true) {
+        router.push('/generatesecurekey');
+      } else {
+        router.push('/verifieduser');
+      }
+    } catch (error) {
+      console.error("Error checking key status, defaulting to key generation flow:", error);
+      router.push('/generatesecurekey');
+    } finally {
+      setIsCheckingKey(false);
+    }
   };
 
   return (
@@ -81,8 +98,9 @@ export default function HomePage() {
                 onClick={handleExploreCourses}
                 size="lg"
                 className="bg-cyan-500 hover:bg-cyan-600 text-white font-semibold px-8 py-6 text-lg rounded-full transition-transform hover:scale-105 shadow-lg shadow-cyan-500/20"
+                disabled={isCheckingKey}
               >
-                Explore Courses <ArrowRight className="ml-2" />
+                {isCheckingKey ? <Loader className="animate-spin" /> : <>Explore Courses <ArrowRight className="ml-2" /></>}
               </Button>
               <a href="https://t.me/BookVerse_ProBot" target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
                 <Button
