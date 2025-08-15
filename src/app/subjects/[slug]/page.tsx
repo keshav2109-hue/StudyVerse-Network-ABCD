@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/accordion";
 import { CategoryNavigation } from "@/components/eduverse/category-navigation";
 import { TopicCard } from "@/components/eduverse/topic-card";
-import { ChevronRight, Download, FileText, Lock } from "lucide-react";
+import { ChevronRight, Download, FileText, Lock, Bell, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
@@ -15,6 +15,22 @@ import { DppCard } from "@/components/eduverse/dpp-card";
 import { aarambhVideos, aarambhNotes } from "@/lib/aarambh-data";
 import { abhayVideos, abhayNotes } from "@/lib/abhay-data";
 import { abhay9Videos, abhay9Notes } from "@/lib/abhay9-data";
+import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetClose,
+} from '@/components/ui/sheet';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Header } from "@/components/eduverse/header";
+
 
 interface Lecture {
   id: string;
@@ -259,7 +275,8 @@ export default async function SubjectPage({
 
   return (
     <div className="min-h-screen bg-gray-50 text-foreground">
-      <header className="bg-white shadow-sm sticky top-0 z-10">
+      <Header />
+      <header className="bg-white shadow-sm sticky top-0 z-10 pt-20">
         <div className="max-w-xl mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center text-sm text-gray-500">
@@ -364,3 +381,5 @@ export default async function SubjectPage({
     </div>
   );
 }
+
+      

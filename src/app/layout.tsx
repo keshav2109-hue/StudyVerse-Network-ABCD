@@ -1,3 +1,4 @@
+
 'use client';
 import type { Metadata } from 'next';
 import './globals.css';
@@ -15,6 +16,7 @@ export default function RootLayout({
   const pathname = usePathname();
 
   const isVideoPage = pathname === '/eduverseplay' || pathname === '/watch';
+  const isSubjectPage = pathname.startsWith('/subjects/');
 
   useEffect(() => {
     const handleContextmenu = (e: MouseEvent) => {
@@ -77,10 +79,12 @@ export default function RootLayout({
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" />
       </head>
       <body className="font-body antialiased">
-        {!isVideoPage && <Header />}
+        {!isVideoPage && !isSubjectPage && <Header />}
         {children}
         {!isVideoPage && <Footer />}
         </body>
     </html>
   );
 }
+
+      
