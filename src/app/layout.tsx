@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { useEffect, useState } from 'react';
 import { Footer } from '@/components/eduverse/footer';
+import { Header } from '@/components/eduverse/header';
 
 export default function RootLayout({
   children,
@@ -72,6 +73,7 @@ export default function RootLayout({
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" />
       </head>
       <body className="font-body antialiased">
+        <Header />
         {children}
         <Footer />
         </body>
