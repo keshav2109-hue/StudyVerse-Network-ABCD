@@ -116,16 +116,16 @@ export default function VerifiedUserPage() {
                 
                 <div className="mb-8 space-y-4">
                     <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                         <Input
                             type="text"
                             placeholder="Search for a batch..."
-                            className="w-full pl-10"
+                            className="w-full pr-10"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
-                    <div className="flex items-center justify-center gap-2 flex-wrap">
+                    <div className="flex items-center justify-center gap-2">
                         <Button
                             variant={activeFilter === 'all' ? 'default' : 'outline'}
                             size="sm"
