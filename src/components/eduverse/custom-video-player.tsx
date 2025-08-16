@@ -10,7 +10,6 @@ interface CustomVideoPlayerProps {
   src: string;
 }
 
-const playbackSpeeds = [0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3];
 const qualityLevels = {
     '720p': 'HD',
     '480p': '',
@@ -248,8 +247,6 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
     if (videoRef.current) {
         videoRef.current.playbackRate = rate;
         setPlaybackRate(rate);
-        setActiveSettingsMenu('main');
-        setShowSettings(false);
     }
   }
 
@@ -393,7 +390,7 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
                         <Settings size={20} />
                     </button>
                     {showSettings && (
-                        <div ref={settingsMenuRef} className="absolute bottom-full right-0 mb-2 bg-black/80 rounded-lg p-2 min-w-[150px] text-sm max-h-48 overflow-y-auto">
+                        <div ref={settingsMenuRef} className="absolute bottom-full right-0 mb-2 bg-black/80 rounded-lg p-2 min-w-[180px] text-sm">
                         {activeSettingsMenu === 'main' && (
                                 <>
                                     <button onClick={() => setActiveSettingsMenu('quality')} className="w-full text-left p-2 hover:bg-white/10 rounded-md flex justify-between">
@@ -402,20 +399,26 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
                                     </button>
                                     <button onClick={() => setActiveSettingsMenu('speed')} className="w-full text-left p-2 hover:bg-white/10 rounded-md flex justify-between">
                                         <span>Speed</span>
-                                        <span className="text-gray-400">{playbackRate}x</span>
+                                        <span className="text-gray-400">{playbackRate.toFixed(2)}x</span>
                                     </button>
                                 </>
                         )}
                         {activeSettingsMenu === 'speed' && (
-                                <>
-                                    <button onClick={() => setActiveSettingsMenu('main')} className="w-full text-left p-2 mb-1 border-b border-gray-600">Speed</button>
-                                    {playbackSpeeds.map(speed => (
-                                        <button key={speed} onClick={() => handleSetPlaybackRate(speed)} className="w-full text-left p-2 hover:bg-white/10 rounded-md flex items-center gap-2">
-                                            {playbackRate === speed && <Check size={16} />}
-                                            <span className={playbackRate !== speed ? 'ml-6' : ''}>{speed}x</span>
-                                        </button>
-                                    ))}
-                                </>
+                                <div className="p-2">
+                                     <button onClick={() => setActiveSettingsMenu('main')} className="w-full text-left p-2 mb-1 border-b border-gray-600 text-base font-semibold">Speed</button>
+                                    <div className="flex justify-between items-center my-2">
+                                        <span>Custom ({playbackRate.toFixed(2)}x)</span>
+                                    </div>
+                                    <input
+                                        type="range"
+                                        min="0.25"
+                                        max="3"
+                                        step="0.25"
+                                        value={playbackRate}
+                                        onChange={(e) => handleSetPlaybackRate(parseFloat(e.target.value))}
+                                        className="w-full"
+                                    />
+                                </div>
                         )}
                         {activeSettingsMenu === 'quality' && (
                                 <>
@@ -440,4 +443,3 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
     </div>
   );
 }
-
