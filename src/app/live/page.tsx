@@ -163,7 +163,7 @@ export default function LivePage() {
           pageTitle: c.course_name,
           liveStreamUrl: c.file_url,
           status: 'ended',
-          thumbnailUrl: c.thumbnail_url
+          thumbnailUrl: "https://i.postimg.cc/rsKZhQbz/image.png" // Always use Eduverse image
       }));
       return [...endedFromLive, ...fromCompletedApi];
   }, [allClassDetails, completedData]);
