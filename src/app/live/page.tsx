@@ -3,10 +3,11 @@
 
 import { LiveBadge } from "@/components/eduverse/live-badge";
 import { Card } from "@/components/ui/card";
-import { PlayCircle, Clock } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PlayCircle, Clock, Video } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 
 interface LiveClassInfo {
   pageTitle: string;
@@ -26,24 +27,28 @@ interface LiveData {
   [key: string]: LiveClassInfo;
 }
 
+interface CompletedClass {
+    id: string;
+    title: string;
+    file_url: string;
+    course_name: string;
+    thumbnail_url: string;
+}
+
 interface ClassDetails {
   subject: string;
   pageTitle: string;
   liveStreamUrl: string;
-  times: { startTime: string; endTime: string };
-  timeLabel: string;
+  times?: { startTime: string; endTime: string };
+  timeLabel?: string;
   status: 'live' | 'upcoming' | 'ended';
+  thumbnailUrl?: string;
 }
 
-async function getLiveClasses(): Promise<LiveData> {
+async function getLiveAndUpcomingClasses(): Promise<LiveData> {
   try {
-    const res = await fetch(
-      "/api/live",
-      { cache: "no-store" }
-    );
-    if (!res.ok) {
-      throw new Error("Failed to fetch live classes");
-    }
+    const res = await fetch("/api/live", { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch live classes");
     return res.json();
   } catch (error) {
     console.error(error);
@@ -51,10 +56,22 @@ async function getLiveClasses(): Promise<LiveData> {
   }
 }
 
+async function getCompletedClasses(): Promise<CompletedClass[]> {
+    try {
+        const res = await fetch("/api/completed-live", { cache: "no-store" });
+        if (!res.ok) throw new Error("Failed to fetch completed classes");
+        const data = await res.json();
+        return data.data || [];
+    } catch (error) {
+        console.error(error);
+        return [];
+    }
+}
+
+
 function getClassStatus(startTime: string, endTime: string): 'live' | 'upcoming' | 'ended' {
   try {
     const now = new Date();
-
     const startTimeStr = startTime.substring(11, 19);
     const endTimeStr = endTime.substring(11, 19);
 
@@ -71,12 +88,8 @@ function getClassStatus(startTime: string, endTime: string): 'live' | 'upcoming'
       endDate.setDate(endDate.getDate() + 1);
     }
     
-    if (now >= startDate && now <= endDate) {
-        return 'live';
-    }
-    if (now < startDate) {
-        return 'upcoming';
-    }
+    if (now >= startDate && now <= endDate) return 'live';
+    if (now < startDate) return 'upcoming';
     return 'ended';
 
   } catch (error) {
@@ -85,28 +98,32 @@ function getClassStatus(startTime: string, endTime: string): 'live' | 'upcoming'
   }
 }
 
-
 export default function LivePage() {
   const [liveData, setLiveData] = useState<LiveData>({});
+  const [completedData, setCompletedData] = useState<CompletedClass[]>([]);
   const [loading, setLoading] = useState(true);
   const [, setForceRender] = useState({});
 
   useEffect(() => {
     async function fetchData() {
-      const data = await getLiveClasses();
-      setLiveData(data);
+      setLoading(true);
+      const [live, completed] = await Promise.all([
+          getLiveAndUpcomingClasses(),
+          getCompletedClasses()
+      ]);
+      setLiveData(live);
+      setCompletedData(completed);
       setLoading(false);
     }
     fetchData();
     
-    const dataInterval = setInterval(fetchData, 30000); 
+    const dataInterval = setInterval(fetchData, 60000); 
     const renderInterval = setInterval(() => setForceRender({}), 1000); 
 
     return () => {
         clearInterval(dataInterval);
         clearInterval(renderInterval);
     }
-
   }, []);
 
   const allClassDetails = useMemo(() => {
@@ -133,47 +150,56 @@ export default function LivePage() {
         });
       }
     });
-
-    const statusOrder = { 'live': 1, 'upcoming': 2, 'ended': 3 };
-    return details.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
+    return details;
   }, [liveData]);
 
-  const renderClass = (details: ClassDetails, index: number) => {
+
+  const liveClasses = useMemo(() => allClassDetails.filter(c => c.status === 'live'), [allClassDetails]);
+  const upcomingClasses = useMemo(() => allClassDetails.filter(c => c.status === 'upcoming'), [allClassDetails]);
+  const endedClasses = useMemo(() => {
+      const endedFromLive = allClassDetails.filter(c => c.status === 'ended');
+      const fromCompletedApi: ClassDetails[] = completedData.map(c => ({
+          subject: c.title,
+          pageTitle: c.course_name,
+          liveStreamUrl: c.file_url,
+          status: 'ended',
+          thumbnailUrl: c.thumbnail_url
+      }));
+      return [...endedFromLive, ...fromCompletedApi];
+  }, [allClassDetails, completedData]);
+
+
+  const renderClass = useCallback((details: ClassDetails, index: number) => {
     const isLive = details.status === 'live';
-    
-    const renderIcon = () => {
-      if (isLive) {
-        return <PlayCircle className="h-5 w-5 text-gray-600" />;
-      }
-      return <Clock className="h-5 w-5 text-gray-600" />;
-    };
-    
-    const isClickable = isLive;
+    const isClickable = details.status !== 'upcoming';
+    const imageUrl = details.thumbnailUrl || "https://i.postimg.cc/rsKZhQbz/image.png";
 
     const cardContent = (
-        <Card className={`relative flex items-center p-2.5 rounded-xl shadow-md transition-transform duration-200 ease-in-out ${isClickable ? 'group-hover:scale-[1.02]' : ''} border bg-white`}>
-            {isLive && (
-                <div className="absolute top-2 left-2">
-                    <LiveBadge />
-                </div>
-            )}
-            <Image
-            src="https://i.postimg.cc/rsKZhQbz/image.png"
-            alt="Eduverse"
-            width={80}
-            height={60}
-            className="object-contain rounded-lg mr-4"
-            style={{ height: 'auto' }}
-            />
-            <div className="flex-1">
-            <h3 className="text-sm font-semibold text-black flex items-center gap-2">
-                {details.subject} | {details.pageTitle}
-            </h3>
-            <p className="text-xs text-gray-500 mt-0.5">{details.timeLabel}</p>
-            </div>
-            <div className="bg-gray-100 rounded-full p-2 ml-2">
-            {renderIcon()}
-            </div>
+      <Card className={`relative flex items-center p-2.5 rounded-xl shadow-md transition-transform duration-200 ease-in-out ${isClickable ? 'group-hover:scale-[1.02]' : 'opacity-70'} border bg-white`}>
+        {isLive && (
+          <div className="absolute top-2 left-2 z-10">
+            <LiveBadge />
+          </div>
+        )}
+        <Image
+          src={imageUrl}
+          alt={details.subject}
+          width={80}
+          height={60}
+          className="object-contain rounded-lg mr-4"
+          style={{ height: 'auto' }}
+          onError={(e) => { e.currentTarget.src = "https://i.postimg.cc/rsKZhQbz/image.png"; }}
+        />
+        <div className="flex-1">
+          <h3 className="text-sm font-semibold text-black flex items-center gap-2">
+            {details.subject}
+          </h3>
+          <p className="text-xs text-gray-500 mt-0.5">{details.pageTitle}</p>
+          {details.timeLabel && <p className="text-xs text-gray-500 mt-0.5">{details.timeLabel}</p>}
+        </div>
+        <div className="bg-gray-100 rounded-full p-2 ml-2">
+          {isLive ? <PlayCircle className="h-5 w-5 text-gray-600" /> : details.status === 'upcoming' ? <Clock className="h-5 w-5 text-gray-600" /> : <Video className="h-5 w-5 text-gray-600" />}
+        </div>
       </Card>
     );
 
@@ -185,8 +211,30 @@ export default function LivePage() {
       );
     }
     
-    return <div className={`group block`} key={`${details.subject}-${index}`}>{cardContent}</div>;
-  };
+    return <div className="group block" key={`${details.subject}-${index}`}>{cardContent}</div>;
+  }, []);
+
+  const renderTabContent = (classes: ClassDetails[], type: string) => {
+      if (loading) {
+          return (
+             <div className="text-center text-gray-500 mt-10 p-4 bg-white rounded-xl shadow-md">
+                Loading {type} classes...
+             </div>
+          )
+      }
+      if (classes.length === 0) {
+          return (
+             <div className="text-center text-gray-500 mt-10 p-4 bg-white rounded-xl shadow-md">
+                No {type} classes are available right now.
+             </div>
+          )
+      }
+      return (
+          <div className="grid grid-cols-1 gap-4">
+              {classes.map(renderClass)}
+          </div>
+      )
+  }
 
   return (
     <main className="min-h-screen bg-gray-50 text-foreground">
@@ -200,19 +248,22 @@ export default function LivePage() {
         </div>
       </header>
       <div className="max-w-xl mx-auto px-4 py-5">
-        <div className="grid grid-cols-1 gap-4">
-          {loading ? (
-            <div className="text-center text-gray-500 mt-10 p-4 bg-white rounded-xl shadow-md">
-              Loading live classes...
-            </div>
-          ) : allClassDetails.length > 0 ? (
-             allClassDetails.map(renderClass)
-          ) : (
-            <div className="text-center text-gray-500 mt-10 p-4 bg-white rounded-xl shadow-md">
-              No live classes are scheduled at the moment.
-            </div>
-          )}
-        </div>
+        <Tabs defaultValue="live" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="live">Live</TabsTrigger>
+            <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+            <TabsTrigger value="completed">Completed</TabsTrigger>
+          </TabsList>
+          <TabsContent value="live" className="mt-4">
+            {renderTabContent(liveClasses, 'live')}
+          </TabsContent>
+          <TabsContent value="upcoming" className="mt-4">
+            {renderTabContent(upcomingClasses, 'upcoming')}
+          </TabsContent>
+          <TabsContent value="completed" className="mt-4">
+            {renderTabContent(endedClasses, 'completed')}
+          </TabsContent>
+        </Tabs>
       </div>
     </main>
   );
