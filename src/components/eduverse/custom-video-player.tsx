@@ -3,7 +3,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Hls from 'hls.js';
-import { Play, Pause, Maximize, Minimize, Settings, Check } from 'lucide-react';
+import { Play, Pause, Maximize, Minimize, Settings, Check, Forward, Rewind } from 'lucide-react';
 import Image from 'next/image';
 
 interface CustomVideoPlayerProps {
@@ -81,6 +81,7 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
   const [showSettings, setShowSettings] = useState(false);
   const [activeSettingsMenu, setActiveSettingsMenu] = useState<'main' | 'speed' | 'quality'>('main');
   const [playbackRate, setPlaybackRate] = useState(1);
+  const [seekIndicator, setSeekIndicator] = useState<'forward' | 'rewind' | null>(null);
   
   const [availableQualities, setAvailableQualities] = useState<Quality[]>([]);
   const [currentQuality, setCurrentQuality] = useState<Quality>('720p');
@@ -176,6 +177,8 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
   const handleSeek = (amount: number) => {
     if (videoRef.current) {
       videoRef.current.currentTime += amount;
+      setSeekIndicator(amount > 0 ? 'forward' : 'rewind');
+      setTimeout(() => setSeekIndicator(null), 500);
     }
   };
 
@@ -274,6 +277,21 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
     }
   }
   
+  const handleDoubleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const container = playerContainerRef.current;
+    if (!container) return;
+
+    const rect = container.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const midpoint = container.offsetWidth / 2;
+
+    if (clickX > midpoint) {
+        handleSeek(10);
+    } else {
+        handleSeek(-10);
+    }
+  };
+  
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
         if (e.target instanceof HTMLInputElement || e.target instanceof HTMLButtonElement) return;
@@ -320,10 +338,17 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
     <div
       ref={playerContainerRef}
       className="relative w-full aspect-video bg-black flex justify-center items-center group rounded-lg overflow-hidden"
+      onDoubleClick={handleDoubleClick}
     >
       <video ref={videoRef} className="w-full h-full" onClick={togglePlayPause} onPlay={showAndAutoHideControls} onPause={() => setShowControls(true)}/>
       
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        {seekIndicator && (
+            <div className="absolute bg-black/50 text-white rounded-full p-4 flex flex-col items-center gap-1 transition-opacity duration-300 opacity-100 animate-ping-once">
+                {seekIndicator === 'forward' ? <Forward size={40} /> : <Rewind size={40} />}
+                <span className="text-sm font-bold">10s</span>
+            </div>
+        )}
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -415,3 +440,4 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
     </div>
   );
 }
+
