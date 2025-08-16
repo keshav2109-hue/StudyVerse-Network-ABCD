@@ -368,7 +368,7 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
                         <Settings size={20} />
                     </button>
                     {showSettings && (
-                        <div ref={settingsMenuRef} className="absolute bottom-full right-0 mb-2 bg-black/80 rounded-lg p-2 min-w-[150px] text-sm">
+                        <div ref={settingsMenuRef} className="absolute bottom-full right-0 mb-2 bg-black/80 rounded-lg p-2 min-w-[150px] text-sm max-h-48 overflow-y-auto">
                         {activeSettingsMenu === 'main' && (
                                 <>
                                     <button onClick={() => setActiveSettingsMenu('quality')} className="w-full text-left p-2 hover:bg-white/10 rounded-md flex justify-between">
