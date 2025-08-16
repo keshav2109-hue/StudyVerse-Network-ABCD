@@ -346,17 +346,29 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
                 <span className="text-sm font-bold">10s</span>
             </div>
         )}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            togglePlayPause();
-          }}
-          className={`pointer-events-auto bg-black/50 text-white rounded-full p-4 transition-opacity duration-300 ${
-            isPlaying ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'
-          }`}
-        >
-          {isPlaying ? <Pause size={40} /> : <Play size={40} className="translate-x-[2px]"/>}
-        </button>
+
+        <div className={`absolute inset-0 flex items-center justify-center gap-16 transition-opacity duration-300 ${ isPlaying ? 'opacity-0 group-hover:opacity-100' : 'opacity-100' }`}>
+            <button
+              onClick={(e) => { e.stopPropagation(); handleSeek(-10); }}
+              className="pointer-events-auto bg-black/50 text-white rounded-full p-3"
+            >
+              <Rewind size={32} />
+            </button>
+            
+            <button
+              onClick={(e) => { e.stopPropagation(); togglePlayPause(); }}
+              className="pointer-events-auto bg-black/50 text-white rounded-full p-4"
+            >
+              {isPlaying ? <Pause size={40} /> : <Play size={40} className="translate-x-[2px]"/>}
+            </button>
+            
+            <button
+              onClick={(e) => { e.stopPropagation(); handleSeek(10); }}
+              className="pointer-events-auto bg-black/50 text-white rounded-full p-3"
+            >
+              <Forward size={32} />
+            </button>
+        </div>
       </div>
 
        <div className="absolute top-4 right-4 z-10 opacity-70">
@@ -390,7 +402,7 @@ export function CustomVideoPlayer({ src: initialSrc }: CustomVideoPlayerProps) {
                         <Settings size={20} />
                     </button>
                     {showSettings && (
-                        <div ref={settingsMenuRef} className="absolute bottom-full right-0 mb-2 bg-black/80 rounded-lg p-2 min-w-[180px] text-sm">
+                        <div ref={settingsMenuRef} className="absolute bottom-full right-0 mb-2 bg-black/80 rounded-lg p-2 min-w-[180px] text-sm max-h-48 overflow-y-auto">
                         {activeSettingsMenu === 'main' && (
                                 <>
                                     <button onClick={() => setActiveSettingsMenu('quality')} className="w-full text-left p-2 hover:bg-white/10 rounded-md flex justify-between">
