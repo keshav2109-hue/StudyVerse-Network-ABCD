@@ -55,7 +55,7 @@ export default function Abhay92025Page() {
                 <div className="max-w-xl mx-auto px-4">
                     <div className="flex items-center justify-center h-16">
                         <h1 className="text-2xl font-bold text-gray-800 animate-pulse">
-                            Abhay Class 9th 2025
+                            Abhay Batch - 9th
                         </h1>
                     </div>
                 </div>
