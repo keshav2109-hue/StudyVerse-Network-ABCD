@@ -68,14 +68,20 @@ export default function CommercePage() {
     return (
         <main className="min-h-screen bg-gray-50 text-foreground">
             <header className="bg-white shadow-sm sticky top-0 z-10">
-                <div className="max-w-xl mx-auto px-4">
-                    <div className="flex items-center justify-center h-16">
-                        <h1 className="text-2xl font-bold text-gray-800 animate-pulse">
-                            Eduverse 2.0 Commerce
-                        </h1>
-                    </div>
-                </div>
-            </header>
+    <div className="max-w-xl mx-auto px-4">
+        <div className="flex items-center justify-center h-16">
+            <h1 className="text-2xl font-bold text-gray-800 animate-pulse">
+                Prarambh Commerce
+            </h1>
+        </div>
+    </div>
+</header>
+
+<div className="max-w-xl mx-auto px-4 mt-1">
+    <p className="text-sm text-gray-600 not-italic">
+        Year: 2024-25
+    </p>
+</div>
             <div className="max-w-xl mx-auto px-4 py-5">
                 <div className="grid grid-cols-1 gap-4">
                     <SubjectCard
