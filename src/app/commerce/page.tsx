@@ -77,10 +77,10 @@ export default function CommercePage() {
     </div>
 </header>
 
-<div className="max-w-xl mx-auto px-4 mt-1">
-    <p className="text-sm text-gray-600 not-italic">
-        Year: 2024-25
-    </p>
+<div className="max-w-xl mx-auto px-4 mt-2">
+    <div className="inline-block bg-gray-100 text-gray-700 text-sm px-3 py-1 rounded shadow-sm">
+       Year: 2025–26
+    </div>
 </div>
             <div className="max-w-xl mx-auto px-4 py-5">
                 <div className="grid grid-cols-1 gap-4">
