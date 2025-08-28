@@ -55,7 +55,7 @@ export default function Abhay2025Page() {
                 <div className="max-w-xl mx-auto px-4">
                     <div className="flex items-center justify-center h-16">
                         <h1 className="text-2xl font-bold text-gray-800 animate-pulse">
-                            Abhay 2025 Batch
+                            Abhay Batch - 2025
                         </h1>
                     </div>
                 </div>
