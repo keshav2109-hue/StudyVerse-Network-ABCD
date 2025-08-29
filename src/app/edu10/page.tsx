@@ -79,7 +79,7 @@ export default function Edu10Page() {
                 <div className="max-w-xl mx-auto px-4">
                     <div className="flex items-center justify-center h-16">
                         <h1 className="text-2xl font-bold text-gray-800 animate-pulse">
-                            Eduverse 2.0 Class 10
+                            StudyVerse Class 10 Aarambh
                         </h1>
                     </div>
                 </div>
