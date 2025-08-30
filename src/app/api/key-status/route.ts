@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    const response = await fetch('https://eduverseapi.vercel.app/eduverse/api/keyonoff', {
+    const response = await fetch('https://eduverseapi.vercel.app/eduverse/api/Studyversekeyof', {
       cache: 'no-store',
     });
 
