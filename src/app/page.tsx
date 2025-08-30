@@ -1,104 +1,3 @@
-'use client';
-
-import Image from 'next/image';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Award, BookOpen, Users, Youtube, Send, ArrowRight } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { CommunityPrompt } from '@/components/eduverse/community-prompt';
-import { useToast } from '@/hooks/use-toast';
-
-const features = [
-  {
-    icon: <Award className="w-8 h-8 text-cyan-400" />,
-    title: 'Expert-Led Classes',
-    description: 'Learn from the best educators with years of experience in their fields.',
-  },
-  {
-    icon: <BookOpen className="w-8 h-8 text-cyan-400" />,
-    title: 'Comprehensive Material',
-    description: 'Access detailed notes, DPPs, and video lectures for every topic.',
-  },
-  {
-    icon: <Users className="w-8 h-8 text-cyan-400" />,
-    title: 'Community Support',
-    description: 'Join a thriving community of learners to solve doubts and stay motivated.',
-  },
-];
-
-const COMMUNITY_PROMPT_STORAGE_KEY = 'communityPromptLastShown';
-
-export default function HomePage() {
-  const router = useRouter();
-  const [isPromptOpen, setIsPromptOpen] = useState(false);
-  const { toast } = useToast();
-
-  useEffect(() => {
-    toast({
-      title: "Website Updated",
-      description: "This website is now updated.",
-    });
-    
-    const lastShownStr = localStorage.getItem(COMMUNITY_PROMPT_STORAGE_KEY);
-    const lastShown = lastShownStr ? parseInt(lastShownStr, 10) : 0;
-    const oneDay = 24 * 60 * 60 * 1000;
-
-    if (Date.now() - lastShown > oneDay) {
-      setIsPromptOpen(true);
-      localStorage.setItem(COMMUNITY_PROMPT_STORAGE_KEY, Date.now().toString());
-    }
-  }, []);
-
-  const handleExploreCourses = () => {
-    router.push('/verifieduser');
-  };
-
-  return (
-    <>
-      <CommunityPrompt isOpen={isPromptOpen} onOpenChange={setIsPromptOpen} />
-      <div className="bg-slate-900 min-h-screen text-white">
-        {/* Hero Section */}
-        <section className="text-center py-20 md:py-28 px-4 bg-slate-900">
-          <div className="max-w-4xl mx-auto">
-            <Image
-              src="https://i.postimg.cc/rsKZhQbz/image.png"
-              alt="EduVerse 2.O Logo"
-              width={120}
-              height={120}
-              className="mx-auto mb-6 rounded-2xl shadow-lg"
-            />
-            <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-cyan-400">
-              EduVerse 2.O
-            </h1>
-            <p className="text-lg md:text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
-              Your Gateway to Unlocking Academic Excellence. High-quality education, completely free.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button
-                onClick={handleExploreCourses}
-                size="lg"
-                className="bg-cyan-500 hover:bg-cyan-600 text-white font-semibold px-8 py-6 text-lg rounded-full transition-transform hover:scale-105 shadow-lg shadow-cyan-500/20"
-              >
-                Explore Courses <ArrowRight className="ml-2" />
-              </Button>
-              <a href="https://t.me/BookVerse_ProBot" target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="bg-transparent border-cyan-500 text-cyan-500 hover:bg-cyan-500/10 hover:text-cyan-400 font-semibold px-8 py-6 text-lg rounded-full transition-transform hover:scale-105 w-full"
-                >
-                  Explore Books <BookOpen className="ml-2" />
-                </Button>
-              </a>
-            </div>
-          </div>
-        </section>
-        {/* baki sab same as before */}
-      </div>
-    </>
-  );
-}
 
 'use client';
 
@@ -110,6 +9,9 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { CommunityPrompt } from '@/components/eduverse/community-prompt';
 import { useToast } from '@/hooks/use-toast';
+import { auth } from '@/lib/firebase';
+import { onAuthStateChanged, type User } from 'firebase/auth';
+
 
 const features = [
   {
@@ -131,6 +33,7 @@ const features = [
 
 const COMMUNITY_PROMPT_STORAGE_KEY = 'communityPromptLastShown';
 
+
 export default function HomePage() {
   const router = useRouter();
   const [isPromptOpen, setIsPromptOpen] = useState(false);
@@ -139,20 +42,31 @@ export default function HomePage() {
 
 
   useEffect(() => {
-    toast({
-      title: "Website Updated",
-      description: "This website is now updated.",
-    });
-    
-    const lastShownStr = localStorage.getItem(COMMUNITY_PROMPT_STORAGE_KEY);
-    const lastShown = lastShownStr ? parseInt(lastShownStr, 10) : 0;
-    const oneDay = 24 * 60 * 60 * 1000;
+    const showCommunityPrompt = () => {
+        const lastShownStr = localStorage.getItem(COMMUNITY_PROMPT_STORAGE_KEY);
+        const lastShown = lastShownStr ? parseInt(lastShownStr, 10) : 0;
+        const oneDay = 24 * 60 * 60 * 1000;
 
-    if (Date.now() - lastShown > oneDay) {
-      setIsPromptOpen(true);
-      localStorage.setItem(COMMUNITY_PROMPT_STORAGE_KEY, Date.now().toString());
+        if (Date.now() - lastShown > oneDay) {
+          setIsPromptOpen(true);
+          localStorage.setItem(COMMUNITY_PROMPT_STORAGE_KEY, Date.now().toString());
+        }
     }
-  }, []);
+
+    showCommunityPrompt();
+    
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+       if (user && user.metadata.creationTime === user.metadata.lastSignInTime) {
+          toast({
+              title: "Welcome to EduVerse!",
+              description: "We're glad to have you here. Explore the courses to get started."
+          });
+       }
+    });
+
+    return () => unsubscribe();
+
+  }, [toast]);
 
 
   const handleExploreCourses = async () => {
@@ -162,13 +76,13 @@ export default function HomePage() {
       const data = await response.json();
 
       if (data.on === true) {
-        router.push('/verifieduser');
+        router.push('/generatesecurekey');
       } else {
         router.push('/verifieduser');
       }
     } catch (error) {
       console.error("Error checking key status, defaulting to key generation flow:", error);
-      router.push('/verifieduser');
+      router.push('/generatesecurekey');
     } finally {
       setIsCheckingKey(false);
     }
@@ -177,12 +91,12 @@ export default function HomePage() {
   return (
     <>
       <CommunityPrompt isOpen={isPromptOpen} onOpenChange={setIsPromptOpen} />
-      <div className="bg-slate-900 min-h-screen text-white">
+      <div className="bg-slate-900 min-h-screen text-white pt-20">
         {/* Hero Section */}
         <section className="text-center py-20 md:py-28 px-4 bg-slate-900">
           <div className="max-w-4xl mx-auto">
             <Image
-              src="https://i.postimg.cc/rsKZhQbz/image.png"
+              src="https://i.postimg.cc/wjcm2KrT/image.png"
               alt="EduVerse 2.O Logo"
               width={120}
               height={120}
@@ -262,7 +176,7 @@ export default function HomePage() {
                   YouTube
                 </Button>
               </a>
-              <a href="https://t.me/EduVerse_Network" target="_blank" rel="noopener noreferrer">
+              <a href="https.t.me/EduVerse_Network" target="_blank" rel="noopener noreferrer">
                 <Button size="lg" className="rounded-full bg-sky-600 hover:bg-sky-700 text-white transition-colors">
                   <Send className="w-6 h-6 mr-2" />
                   Telegram
@@ -274,4 +188,4 @@ export default function HomePage() {
       </div>
     </>
   );
-}
+  }
