@@ -1,9 +1,10 @@
 
+
 import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    const response = await fetch('https://theeduverse-api.vercel.app/eduverse/api/keyonoff', {
+    const response = await fetch('https://eduverseapi.vercel.app/eduverse/api/keyonoff', {
       cache: 'no-store',
     });
 
@@ -18,7 +19,6 @@ export async function GET() {
     if (error instanceof Error) {
       errorMessage = error.message;
     }
-    // Default to true (key required) in case of an error to maintain security
-    return NextResponse.json({ on: true, error: errorMessage }, { status: 500 });
+    return NextResponse.json({ on: false, error: errorMessage }, { status: 500 });
   }
 }
